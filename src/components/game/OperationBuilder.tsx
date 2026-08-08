@@ -1,0 +1,106 @@
+import { cn } from "@/lib/utils";
+import type { RepRole, Representation } from "@/types/game";
+
+type Props = {
+  representation: Representation;
+  filled: Partial<Record<RepRole, number>>;
+  activeBlank: RepRole | null;
+  onChoose: (value: number) => void;
+  compact?: boolean;
+};
+
+const roleLabel: Record<RepRole, string> = {
+  initial: "quantos havia",
+  removed: "quantos saíram",
+  result: "quantos ficaram",
+};
+
+/**
+ * Representação simbólica da subtração: [__] − [__] = [__].
+ * Interação apenas por clique; a lacuna ativa é destacada por contorno.
+ */
+export function OperationBuilder({
+  representation,
+  filled,
+  activeBlank,
+  onChoose,
+  compact = false,
+}: Props) {
+  const value = (role: RepRole) =>
+    representation.blanks.includes(role) ? (filled[role] ?? null) : representation[role];
+
+  const numberSize = compact ? 42 : 50;
+
+  const Slot = ({ role }: { role: RepRole }) => {
+    const v = value(role);
+    const isActive = activeBlank === role;
+    return (
+      <span
+        aria-label={`Número que mostra ${roleLabel[role]}${v === null ? ": lacuna" : `: ${v}`}`}
+        className={cn(
+          "inline-flex items-center justify-center rounded-2xl bg-[var(--cream)] tabular-nums",
+          "border-[var(--navy)] text-[var(--navy)] font-display font-bold",
+          v === null ? "border-4 border-dashed" : "border-4",
+          isActive && "border-8 shadow-[0_0_0_4px_rgba(12,42,74,0.18)]",
+        )}
+        style={{
+          minWidth: compact ? 92 : 108,
+          height: compact ? 66 : 78,
+          fontSize: numberSize,
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {v === null ? "" : v}
+      </span>
+    );
+  };
+
+  const Symbol = ({ children }: { children: string }) => (
+    <span
+      className="font-display font-bold text-[var(--navy)]"
+      style={{ fontSize: numberSize }}
+      aria-hidden="true"
+    >
+      {children}
+    </span>
+  );
+
+  return (
+    <div className={cn("flex flex-col items-center", compact ? "gap-3" : "gap-4")}>
+      <div className={cn("flex items-center", compact ? "gap-3" : "gap-4")}>
+        <Slot role="initial" />
+        <Symbol>−</Symbol>
+        <Slot role="removed" />
+        <Symbol>=</Symbol>
+        <Slot role="result" />
+      </div>
+
+      {activeBlank && representation.choices.length > 0 && (
+        <div className={cn("flex items-center justify-center", compact ? "gap-3" : "gap-4")}>
+          {representation.choices.map((choice) => (
+            <button
+              key={choice}
+              type="button"
+              onClick={() => onChoose(choice)}
+              aria-label={`Usar o número ${choice}`}
+              className={cn(
+                "cursor-pointer rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)]",
+                "font-display font-bold text-[var(--navy)] shadow-[0_3px_0_rgba(12,42,74,0.2)]",
+                "transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97]",
+                "focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--navy)]",
+              )}
+              style={{
+                minWidth: compact ? 96 : 116,
+                height: compact ? 72 : 86,
+                fontSize: compact ? 38 : 44,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {choice}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -7,6 +7,23 @@ export type Speech = {
   text: string;
 };
 
+export type RepRole = "initial" | "removed" | "result";
+
+/** Microetapa de representação simbólica após o acerto (andaimagem progressiva). */
+export type Representation = {
+  /** 0 = demonstração, 1 = uma lacuna, 2 = duas lacunas, 3 = três lacunas */
+  level: 0 | 1 | 2 | 3;
+  initial: number;
+  removed: number;
+  result: number;
+  /** lacunas na ordem inicial → retirada → restante */
+  blanks: RepRole[];
+  /** números disponíveis para clique */
+  choices: number[];
+  prompt: Speech;
+  done: Speech;
+};
+
 export type Challenge = {
   id: string;
   /** número do desafio pontuado (1..12); null para tutorial/demonstração */
@@ -22,6 +39,7 @@ export type Challenge = {
   observe: Speech;
   correct: Speech;
   errors: Speech[];
+  representation: Representation;
 };
 
 export type MetaQuestion = {
@@ -49,4 +67,4 @@ export type Step =
   | { kind: "meta"; id: string; meta: MetaQuestion }
   | { kind: "final"; id: string; speech: Speech };
 
-export type Phase = "observe" | "removing" | "question" | "solved";
+export type Phase = "observe" | "removing" | "question" | "solved" | "represent";
