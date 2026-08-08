@@ -241,7 +241,7 @@ export function GameScreen() {
           </div>
 
           <div
-            className="mt-4 flex w-full justify-center overflow-visible"
+            className="mt-3 flex w-full justify-center overflow-visible"
             style={{ zIndex: 10 }}
           >
             <FishScene
@@ -369,14 +369,14 @@ export function GameScreen() {
           className="absolute"
           style={{
             zIndex: 30,
-            left: hasTens ? 120 : 210,
-            bottom: hasTens ? 12 : 178,
+            left: hasTens ? 100 : 210,
+            bottom: hasTens ? 8 : 178,
           }}
         >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
-            width={hasTens ? 600 : 560}
+            width={hasTens ? 620 : 560}
             onPlay={() => {
               if (speaking) {
                 stop();
