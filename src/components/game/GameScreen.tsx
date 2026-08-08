@@ -495,13 +495,13 @@ export function GameScreen() {
           </button>
         )}
 
-        {((step.kind === "challenge" && phase === "represent" && repDone) ||
-          step.kind === "intro" ||
+        {(step.kind === "intro" ||
           step.kind === "transition" ||
           step.kind === "summary" ||
           (step.kind === "meta" && metaAnswered)) && (
           <AssetButton asset="next" width={190} label="Seguir para a próxima tela" onClick={goNext} />
         )}
+
 
         {step.kind === "final" && (
           <>
@@ -553,6 +553,21 @@ export function GameScreen() {
           </div>
         </div>
       )}
+
+      {/* ZONA D — NAVEGAÇÃO PRÓPRIA DA MICROETAPA "REPRESENT" (fora da zona da operação) */}
+      {step.kind === "challenge" && phase === "represent" && repDone && (
+        <div
+          className="absolute animate-scale-in"
+          style={
+            representLayout === "tens"
+              ? { zIndex: 50, right: 24, top: 24 }
+              : { zIndex: 50, right: 24, bottom: 240 }
+          }
+        >
+          <AssetButton asset="next" width={190} label="Seguir para a próxima tela" onClick={goNext} />
+        </div>
+      )}
+
 
       {/* Demonstração automática nas transições com cena */}
       {step.kind === "transition" && step.demo && phase === "observe" && (
