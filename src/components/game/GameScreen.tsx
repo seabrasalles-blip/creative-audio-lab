@@ -223,6 +223,16 @@ export function GameScreen() {
     step.kind === "summary" ||
     (step.kind === "transition" && (step.demo?.tens ?? 0) > 0);
 
+  /** Composição própria da microetapa de representação simbólica. */
+  const isRepresent = step.kind === "challenge" && phase === "represent";
+  const representLayout: "tens" | "simple" | null = isRepresent
+    ? hasTens
+      ? "tens"
+      : "simple"
+    : null;
+
+
+
 
   if (!ready) {
     return (
