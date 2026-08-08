@@ -536,7 +536,8 @@ export function GameScreen() {
           style={
             representLayout === "tens"
               ? { zIndex: 40, right: 16, bottom: 24, width: 440 }
-              : { zIndex: 40, left: 0, right: 0, bottom: 24 }
+              : { zIndex: 40, left: 470, right: 20, bottom: 24 }
+
           }
         >
           <div className={representLayout === "tens" ? "flex w-full justify-center" : "flex w-[620px] justify-center"}>
