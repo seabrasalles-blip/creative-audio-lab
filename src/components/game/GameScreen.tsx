@@ -221,9 +221,10 @@ export function GameScreen() {
       {/* ENUNCIADO */}
       {step.kind === "challenge" && (
         <div
-          className="absolute left-1/2 top-6 w-[820px] -translate-x-1/2 rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
-          style={{ zIndex: 40 }}
+          className="absolute left-1/2 top-6 -translate-x-1/2 rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
+          style={{ zIndex: 40, width: hasTens ? 660 : 820 }}
         >
+
           <h1
             className="font-body text-[30px] font-semibold text-[var(--navy)]"
             style={{ lineHeight: 1.35 }}
