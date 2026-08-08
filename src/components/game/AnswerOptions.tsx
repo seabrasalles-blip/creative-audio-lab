@@ -11,7 +11,7 @@ type Props = {
 /** Alternativas numéricas grandes, integradas ao cenário. */
 export function AnswerOptions({ options, selected, correctAnswer, solved, onSelect }: Props) {
   return (
-    <div className="flex items-center justify-center gap-8" style={{ zIndex: 40 }}>
+    <div className="flex items-center justify-center gap-5" style={{ zIndex: 40 }}>
       {options.map((value) => {
         const isChosen = selected === value;
         const isRight = solved && value === correctAnswer;
