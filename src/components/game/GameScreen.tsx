@@ -401,11 +401,19 @@ export function GameScreen() {
       {step.kind !== "cover" && (
         <div
           className="absolute left-6"
-          style={{ zIndex: 20, bottom: hasTens ? 0 : 10 }}
+          style={{ zIndex: 20, bottom: representLayout ? 0 : hasTens ? 0 : 10 }}
         >
           <Character
             pose={pose}
-            height={step.kind === "final" ? 340 : hasTens ? 210 : 260}
+            height={
+              step.kind === "final"
+                ? 340
+                : representLayout === "simple"
+                  ? 235
+                  : hasTens
+                    ? 210
+                    : 260
+            }
           />
         </div>
       )}
@@ -416,15 +424,20 @@ export function GameScreen() {
           className="absolute"
           style={{
             zIndex: 30,
-            left: hasTens ? 100 : 210,
-            bottom: hasTens ? 8 : 178,
+            ...(representLayout === "simple"
+              ? { left: 220, bottom: 245 }
+              : representLayout === "tens"
+                ? { left: 200, bottom: 10 }
+                : { left: hasTens ? 100 : 210, bottom: hasTens ? 8 : 178 }),
           }}
         >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
             finished={finished}
-            width={hasTens ? 620 : 560}
+            width={
+              representLayout === "simple" ? 520 : representLayout === "tens" ? 520 : hasTens ? 620 : 560
+            }
             onPlay={() => {
               if (speaking) {
                 stop();
