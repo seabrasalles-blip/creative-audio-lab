@@ -374,7 +374,7 @@ export function GameScreen() {
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
-            width={hasTens ? 500 : 560}
+            width={hasTens ? 460 : 560}
             onPlay={() => {
               if (speaking) {
                 stop();
