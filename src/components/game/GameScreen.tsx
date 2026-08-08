@@ -79,12 +79,12 @@ export function GameScreen() {
   }, [attempts, hintVisible, metaAnswered, metaWrong, phase, step]);
 
   // Troca de tela/fala interrompe imediatamente o áudio anterior.
+  // Nunca há reprodução automática: o áudio só começa por clique do estudante.
   useEffect(() => {
     stop();
-    if (!started || !currentSpeech) return;
-    speak(currentSpeech);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSpeech?.key, started]);
+  }, [currentSpeech?.key, stepIndex]);
+
 
   const goNext = useCallback(() => {
     stop();
