@@ -185,10 +185,10 @@ export function GameScreen() {
 
       {/* CAPA */}
       {step.kind === "cover" && (
-        <div className="absolute inset-x-0 bottom-14 flex justify-center" style={{ zIndex: 50 }}>
+        <div className="absolute inset-x-0 bottom-10 flex justify-center" style={{ zIndex: 50 }}>
           <AssetButton
             asset="start"
-            width={240}
+            width={300}
             label="Iniciar a atividade"
             onClick={() => {
               setStarted(true);
@@ -354,7 +354,7 @@ export function GameScreen() {
 
       {/* NAVEGAÇÃO E AÇÕES */}
       <div
-        className="absolute bottom-7 right-8 flex items-center gap-5"
+        className="absolute bottom-6 right-6 flex flex-col items-end gap-3"
         style={{ zIndex: 50 }}
       >
         {step.kind === "challenge" && phase !== "observe" && phase !== "solved" && (
@@ -405,7 +405,7 @@ export function GameScreen() {
       {/* ALTERNATIVAS */}
       {step.kind === "challenge" && (phase === "question" || phase === "solved") && (
         <div className="absolute inset-x-0 bottom-[36px] flex justify-center" style={{ zIndex: 40 }}>
-          <div className="ml-[220px]">
+          <div className="pr-[240px] pl-[240px]">
             <AnswerOptions
               options={step.challenge.options}
               selected={selectedAnswer}
