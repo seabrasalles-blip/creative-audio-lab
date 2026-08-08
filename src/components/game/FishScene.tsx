@@ -11,10 +11,16 @@ type SceneProps = {
   phase: Phase;
   animationKey: number;
   highlightRemaining?: boolean;
+  /** Composição condensada usada quando há dezenas (cardumes + unidades). */
+  compact?: boolean;
 };
 
-const GROUP_WIDTH = 190;
 const FISH_WIDTH = 74;
+
+/** Cardumes grandes o bastante para a criança reconhecer os 10 peixes. */
+function groupWidth(tens: number) {
+  return tens >= 4 ? 170 : 190;
+}
 
 /**
  * Cena matemática: cardumes (dezenas) e peixes individuais (unidades).
@@ -28,8 +34,10 @@ export function FishScene({
   phase,
   animationKey,
   highlightRemaining = false,
+  compact = false,
 }: SceneProps) {
   const leaving = phase !== "observe";
+  const GROUP_WIDTH = groupWidth(tens);
 
   const groups = Array.from({ length: tens }, (_, i) => ({
     id: `g${i}`,
@@ -44,9 +52,10 @@ export function FishScene({
   return (
     <div
       key={animationKey}
-      className="flex flex-col items-center justify-center gap-6"
+      className={`flex flex-col items-center justify-start ${compact ? "gap-3" : "gap-6"}`}
       style={{ zIndex: 10 }}
     >
+
       {tens > 0 && (
         <div className="flex items-center justify-center gap-10">
           <AnimatePresence>
