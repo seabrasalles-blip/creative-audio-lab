@@ -349,17 +349,31 @@ export function GameScreen() {
 
       {/* MARA */}
       {step.kind !== "cover" && (
-        <div className="absolute bottom-[10px] left-6" style={{ zIndex: 20 }}>
-          <Character pose={pose} height={step.kind === "final" ? 340 : 260} />
+        <div
+          className="absolute left-6"
+          style={{ zIndex: 20, bottom: hasTens ? 0 : 10 }}
+        >
+          <Character
+            pose={pose}
+            height={step.kind === "final" ? 340 : hasTens ? 240 : 260}
+          />
         </div>
       )}
 
       {/* BALÃO DE FALA */}
       {currentSpeech && (
-        <div className="absolute bottom-[178px] left-[210px]" style={{ zIndex: 30 }}>
+        <div
+          className="absolute"
+          style={{
+            zIndex: 30,
+            left: hasTens ? 200 : 210,
+            bottom: hasTens ? 24 : 178,
+          }}
+        >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
+            width={hasTens ? 460 : 560}
             onPlay={() => {
               if (speaking) {
                 stop();
@@ -374,9 +388,10 @@ export function GameScreen() {
 
       {/* NAVEGAÇÃO E AÇÕES */}
       <div
-        className="absolute bottom-6 right-6 flex flex-col items-end gap-3"
-        style={{ zIndex: 50 }}
+        className="absolute right-6 flex flex-col items-end gap-3"
+        style={{ zIndex: 50, ...(hasTens ? { top: 20 } : { bottom: 24 }) }}
       >
+
         {step.kind === "challenge" && phase !== "observe" && phase !== "solved" && (
           <AssetButton
             asset="hint"
