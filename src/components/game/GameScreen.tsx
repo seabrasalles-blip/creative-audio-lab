@@ -169,6 +169,16 @@ export function GameScreen() {
 
   const challengeNumber = step.kind === "challenge" ? step.challenge.number : null;
 
+  /**
+   * Composição condensada: telas cuja cena matemática usa cardumes (dezenas).
+   * A cena ocupa a faixa protegida Y 135–430 e a mediação vai para a faixa inferior.
+   */
+  const hasTens =
+    (step.kind === "challenge" && step.challenge.tens > 0) ||
+    step.kind === "summary" ||
+    (step.kind === "transition" && (step.demo?.tens ?? 0) > 0);
+
+
   if (!ready) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-[var(--deep-sea)]">
@@ -211,9 +221,10 @@ export function GameScreen() {
       {/* ENUNCIADO */}
       {step.kind === "challenge" && (
         <div
-          className="absolute left-1/2 top-6 w-[820px] -translate-x-1/2 rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
-          style={{ zIndex: 40 }}
+          className="absolute left-1/2 top-6 -translate-x-1/2 rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
+          style={{ zIndex: 40, width: hasTens ? 660 : 820 }}
         >
+
           <h1
             className="font-body text-[30px] font-semibold text-[var(--navy)]"
             style={{ lineHeight: 1.35 }}
@@ -227,9 +238,12 @@ export function GameScreen() {
         </div>
       )}
 
-      {/* CENA MATEMÁTICA */}
+      {/* CENA MATEMÁTICA — faixa protegida */}
       {step.kind === "challenge" && (
-        <div className="absolute inset-x-0 top-[150px] flex justify-center" style={{ zIndex: 10 }}>
+        <div
+          className="absolute inset-x-0 flex justify-center overflow-visible"
+          style={{ zIndex: 10, top: hasTens ? 120 : 150, height: hasTens ? 290 : undefined }}
+        >
           <FishScene
             tens={step.challenge.tens}
             ones={step.challenge.ones}
@@ -238,6 +252,7 @@ export function GameScreen() {
             phase={phase}
             animationKey={animationKey}
             highlightRemaining={phase === "solved"}
+            compact={hasTens}
           />
         </div>
       )}
@@ -256,7 +271,10 @@ export function GameScreen() {
       )}
 
       {step.kind === "transition" && step.demo && (
-        <div className="absolute inset-x-0 top-[140px] flex justify-center" style={{ zIndex: 10 }}>
+        <div
+          className="absolute inset-x-0 flex justify-center overflow-visible"
+          style={{ zIndex: 10, top: hasTens ? 120 : 140, height: hasTens ? 290 : undefined }}
+        >
           <FishScene
             tens={step.demo.tens}
             ones={step.demo.ones}
@@ -264,6 +282,7 @@ export function GameScreen() {
             removeOnes={step.demo.removeOnes}
             phase={phase}
             animationKey={animationKey}
+            compact={hasTens}
           />
         </div>
       )}
@@ -282,8 +301,8 @@ export function GameScreen() {
             </p>
           </div>
           <div
-            className="absolute inset-x-0 top-[150px] flex justify-center"
-            style={{ zIndex: 10 }}
+            className="absolute inset-x-0 flex justify-center overflow-visible"
+            style={{ zIndex: 10, top: 120, height: 290 }}
           >
             <FishScene
               tens={3}
@@ -293,10 +312,12 @@ export function GameScreen() {
               phase="solved"
               animationKey={animationKey}
               highlightRemaining
+              compact
             />
           </div>
         </>
       )}
+
 
       {/* METACOGNIÇÃO */}
       {step.kind === "meta" && (
@@ -329,17 +350,31 @@ export function GameScreen() {
 
       {/* MARA */}
       {step.kind !== "cover" && (
-        <div className="absolute bottom-[10px] left-6" style={{ zIndex: 20 }}>
-          <Character pose={pose} height={step.kind === "final" ? 340 : 260} />
+        <div
+          className="absolute left-6"
+          style={{ zIndex: 20, bottom: hasTens ? 0 : 10 }}
+        >
+          <Character
+            pose={pose}
+            height={step.kind === "final" ? 340 : hasTens ? 240 : 260}
+          />
         </div>
       )}
 
       {/* BALÃO DE FALA */}
       {currentSpeech && (
-        <div className="absolute bottom-[178px] left-[210px]" style={{ zIndex: 30 }}>
+        <div
+          className="absolute"
+          style={{
+            zIndex: 30,
+            left: hasTens ? 200 : 210,
+            bottom: hasTens ? 18 : 178,
+          }}
+        >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
+            width={hasTens ? 460 : 560}
             onPlay={() => {
               if (speaking) {
                 stop();
@@ -354,9 +389,10 @@ export function GameScreen() {
 
       {/* NAVEGAÇÃO E AÇÕES */}
       <div
-        className="absolute bottom-6 right-6 flex flex-col items-end gap-3"
-        style={{ zIndex: 50 }}
+        className="absolute right-6 flex flex-col items-end gap-3"
+        style={{ zIndex: 50, ...(hasTens ? { top: 20 } : { bottom: 24 }) }}
       >
+
         {step.kind === "challenge" && phase !== "observe" && phase !== "solved" && (
           <AssetButton
             asset="hint"
@@ -404,8 +440,11 @@ export function GameScreen() {
 
       {/* ALTERNATIVAS */}
       {step.kind === "challenge" && (phase === "question" || phase === "solved") && (
-        <div className="absolute inset-x-0 bottom-[36px] flex justify-center" style={{ zIndex: 40 }}>
-          <div className="pr-[240px] pl-[240px]">
+        <div
+          className={`absolute inset-x-0 bottom-[36px] flex ${hasTens ? "justify-end pr-8" : "justify-center"}`}
+          style={{ zIndex: 40 }}
+        >
+          <div className={hasTens ? "" : "pr-[240px] pl-[240px]"}>
             <AnswerOptions
               options={step.challenge.options}
               selected={selectedAnswer}
@@ -416,6 +455,7 @@ export function GameScreen() {
           </div>
         </div>
       )}
+
 
       {/* Demonstração automática nas transições com cena */}
       {step.kind === "transition" && step.demo && phase === "observe" && (
