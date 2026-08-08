@@ -57,7 +57,8 @@ export function FishScene({
     >
 
       {tens > 0 && (
-        <div className="flex items-center justify-center gap-10">
+        <div className={`flex items-center justify-center ${compact ? "gap-6" : "gap-10"}`}>
+
           <AnimatePresence>
             {groups.map((g, index) =>
               leaving && g.leaves ? null : (
