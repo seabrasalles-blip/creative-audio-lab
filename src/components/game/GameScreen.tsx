@@ -5,6 +5,7 @@ import { AssetButton } from "@/components/game/AssetButton";
 import { Character } from "@/components/game/Character";
 import { FishScene } from "@/components/game/FishScene";
 import { GameCanvas } from "@/components/game/GameCanvas";
+import { MetacognitionScreen } from "@/components/game/MetacognitionScreen";
 import { OperationBuilder } from "@/components/game/OperationBuilder";
 import { ProgressIndicator } from "@/components/game/ProgressIndicator";
 import { SceneDecor } from "@/components/game/SceneDecor";
@@ -378,37 +379,36 @@ export function GameScreen() {
 
 
 
-      {/* METACOGNIÇÃO */}
-      {step.kind === "meta" && (
-        <div
-          className="absolute left-1/2 top-[150px] flex w-[760px] -translate-x-1/2 flex-col gap-4"
-          style={{ zIndex: 40 }}
-        >
-          {step.meta.options.map((option) => (
-            <button
-              key={option.label}
-              type="button"
-              disabled={metaAnswered}
-              onClick={() => {
-                if (option.correct) {
-                  setMetaWrong(false);
-                  setMetaAnswered(true);
-                } else {
-                  setMetaWrong(true);
-                }
-              }}
-              aria-label={`Responder: ${option.label}`}
-              className="min-h-[80px] cursor-pointer rounded-[28px] border-4 border-[var(--navy)] bg-[var(--cream)] px-7 py-4 text-left font-body text-[28px] font-medium text-[var(--navy)] shadow-[0_3px_0_rgba(12,42,74,0.2)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--navy)] disabled:cursor-default disabled:hover:scale-100"
-              style={{ lineHeight: 1.4 }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+      {/* METACOGNIÇÃO — composição exclusiva */}
+      {step.kind === "meta" && currentSpeech && (
+        <MetacognitionScreen
+          meta={step.meta}
+          answered={metaAnswered}
+          wrong={metaWrong}
+          speech={currentSpeech}
+          speaking={speaking}
+          finished={finished}
+          onAnswer={(correct) => {
+            if (correct) {
+              setMetaWrong(false);
+              setMetaAnswered(true);
+            } else {
+              setMetaWrong(true);
+            }
+          }}
+          onPlay={() => {
+            if (speaking) {
+              stop();
+              return;
+            }
+            speak(currentSpeech);
+          }}
+          onNext={goNext}
+        />
       )}
 
       {/* MARA */}
-      {step.kind !== "cover" && (
+      {step.kind !== "cover" && step.kind !== "meta" && (
         <div
           className="absolute left-6"
           style={{ zIndex: 20, bottom: representLayout ? 0 : hasTens ? 0 : 10 }}
@@ -428,8 +428,9 @@ export function GameScreen() {
         </div>
       )}
 
+
       {/* BALÃO DE FALA */}
-      {currentSpeech && (
+      {currentSpeech && step.kind !== "meta" && (
         <div
           className="absolute"
           style={{
@@ -495,10 +496,8 @@ export function GameScreen() {
           </button>
         )}
 
-        {(step.kind === "intro" ||
-          step.kind === "transition" ||
-          step.kind === "summary" ||
-          (step.kind === "meta" && metaAnswered)) && (
+        {(step.kind === "intro" || step.kind === "transition" || step.kind === "summary") && (
+
           <AssetButton asset="next" width={190} label="Seguir para a próxima tela" onClick={goNext} />
         )}
 
