@@ -437,7 +437,8 @@ export function GameScreen() {
             ...(representLayout === "simple"
               ? { left: 220, bottom: 245 }
               : representLayout === "tens"
-                ? { left: 200, bottom: 10 }
+                ? { left: 190, bottom: 10 }
+
                 : { left: hasTens ? 100 : 210, bottom: hasTens ? 8 : 178 }),
           }}
         >
