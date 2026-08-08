@@ -540,7 +540,7 @@ export function GameScreen() {
 
           }
         >
-          <div className={representLayout === "tens" ? "flex w-full justify-center" : "flex w-[620px] justify-center"}>
+          <div className="flex w-full justify-center">
 
             <OperationBuilder
               representation={representation}
