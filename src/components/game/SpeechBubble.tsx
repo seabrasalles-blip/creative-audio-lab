@@ -5,11 +5,13 @@ export function SpeechBubble({
   text,
   onPlay,
   speaking,
+  finished = false,
   width = 560,
 }: {
   text: string;
   onPlay: () => void;
   speaking: boolean;
+  finished?: boolean;
   width?: number;
 }) {
   return (
@@ -30,7 +32,13 @@ export function SpeechBubble({
         asset="audio"
         width={72}
         onClick={onPlay}
-        label={speaking ? "Pausar ou interromper fala da Mara" : "Ouvir fala da Mara"}
+        label={
+          speaking
+            ? "Interromper fala da Mara"
+            : finished
+              ? "Ouvir fala da Mara novamente"
+              : "Ouvir fala da Mara"
+        }
       />
     </div>
   );

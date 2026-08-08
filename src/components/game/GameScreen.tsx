@@ -19,10 +19,9 @@ const TOTAL_CHALLENGES = scoredChallenges.length;
 
 export function GameScreen() {
   const ready = useAssetPreload(preloadList);
-  const { speak, stop, speaking } = useMaraVoice();
+  const { speak, stop, speaking, finished } = useMaraVoice();
 
   const [stepIndex, setStepIndex] = useState(0);
-  const [started, setStarted] = useState(false);
   const [phase, setPhase] = useState<Phase>("observe");
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [attempts, setAttempts] = useState(0);
@@ -79,12 +78,12 @@ export function GameScreen() {
   }, [attempts, hintVisible, metaAnswered, metaWrong, phase, step]);
 
   // Troca de tela/fala interrompe imediatamente o áudio anterior.
+  // Nunca há reprodução automática: o áudio só começa por clique do estudante.
   useEffect(() => {
     stop();
-    if (!started || !currentSpeech) return;
-    speak(currentSpeech);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSpeech?.key, started]);
+  }, [currentSpeech?.key, stepIndex]);
+
 
   const goNext = useCallback(() => {
     stop();
@@ -101,7 +100,6 @@ export function GameScreen() {
   const restart = useCallback(() => {
     stop();
     setStepIndex(0);
-    setStarted(false);
     setAttemptsByQuestion({});
     resetStepState();
   }, [resetStepState, stop]);
@@ -201,7 +199,6 @@ export function GameScreen() {
             width={300}
             label="Iniciar a atividade"
             onClick={() => {
-              setStarted(true);
               goNext();
             }}
           />
@@ -376,13 +373,13 @@ export function GameScreen() {
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
+            finished={finished}
             width={hasTens ? 620 : 560}
             onPlay={() => {
               if (speaking) {
                 stop();
                 return;
               }
-              setStarted(true);
               speak(currentSpeech);
             }}
           />
