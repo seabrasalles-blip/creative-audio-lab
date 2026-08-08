@@ -440,8 +440,11 @@ export function GameScreen() {
 
       {/* ALTERNATIVAS */}
       {step.kind === "challenge" && (phase === "question" || phase === "solved") && (
-        <div className="absolute inset-x-0 bottom-[36px] flex justify-center" style={{ zIndex: 40 }}>
-          <div className="pr-[240px] pl-[240px]">
+        <div
+          className={`absolute inset-x-0 bottom-[36px] flex ${hasTens ? "justify-end pr-8" : "justify-center"}`}
+          style={{ zIndex: 40 }}
+        >
+          <div className={hasTens ? "" : "pr-[240px] pl-[240px]"}>
             <AnswerOptions
               options={step.challenge.options}
               selected={selectedAnswer}
@@ -452,6 +455,7 @@ export function GameScreen() {
           </div>
         </div>
       )}
+
 
       {/* Demonstração automática nas transições com cena */}
       {step.kind === "transition" && step.demo && phase === "observe" && (
