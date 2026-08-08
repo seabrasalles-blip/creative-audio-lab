@@ -11,6 +11,7 @@ import type { Speech } from "@/types/game";
 export function useMaraVoice() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [speaking, setSpeaking] = useState(false);
+  const [finished, setFinished] = useState(false);
 
   const stop = useCallback(() => {
     if (audioRef.current) {
@@ -36,7 +37,10 @@ export function useMaraVoice() {
     utterance.rate = 0.92;
     utterance.pitch = 1;
     utterance.volume = 1;
-    utterance.onend = () => setSpeaking(false);
+    utterance.onend = () => {
+      setSpeaking(false);
+      setFinished(true);
+    };
     utterance.onerror = () => setSpeaking(false);
     setSpeaking(true);
     window.speechSynthesis.speak(utterance);
@@ -45,11 +49,15 @@ export function useMaraVoice() {
   const speak = useCallback(
     (speech: Speech) => {
       stop();
+      setFinished(false);
       const src = audioSources[speech.key];
       if (src) {
         const audio = new Audio(src);
         audioRef.current = audio;
-        audio.onended = () => setSpeaking(false);
+        audio.onended = () => {
+          setSpeaking(false);
+          setFinished(true);
+        };
         audio.onerror = () => {
           console.error(`Áudio indisponível para a fala "${speech.key}" (${src}).`);
           speakWithSynthesis(speech.text);
@@ -67,5 +75,5 @@ export function useMaraVoice() {
 
   useEffect(() => stop, [stop]);
 
-  return { speak, stop, speaking };
+  return { speak, stop, speaking, finished };
 }
