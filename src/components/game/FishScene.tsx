@@ -83,7 +83,10 @@ export function FishScene({
       )}
 
       {ones > 0 && (
-        <div className="flex max-w-[900px] flex-wrap items-center justify-center gap-6">
+        <div
+          className={`flex flex-wrap items-center justify-center ${compact ? "max-w-[760px] gap-4" : "max-w-[900px] gap-6"}`}
+        >
+
           <AnimatePresence>
             {units.map((u, index) =>
               leaving && u.leaves ? null : (
