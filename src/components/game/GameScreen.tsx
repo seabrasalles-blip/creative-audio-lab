@@ -19,7 +19,7 @@ const TOTAL_CHALLENGES = scoredChallenges.length;
 
 export function GameScreen() {
   const ready = useAssetPreload(preloadList);
-  const { speak, stop, speaking } = useMaraVoice();
+  const { speak, stop, speaking, finished } = useMaraVoice();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("observe");
@@ -373,6 +373,7 @@ export function GameScreen() {
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
+            finished={finished}
             width={hasTens ? 620 : 560}
             onPlay={() => {
               if (speaking) {
