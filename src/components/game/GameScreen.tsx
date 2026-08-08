@@ -529,13 +529,18 @@ export function GameScreen() {
       )}
 
 
-      {/* REPRESENTAÇÃO SIMBÓLICA — ocupa o lugar das alternativas */}
+      {/* ZONA C — REPRESENTAÇÃO SIMBÓLICA (composição própria da fase) */}
       {step.kind === "challenge" && phase === "represent" && representation && (
         <div
-          className={`absolute inset-x-0 bottom-[28px] flex ${hasTens ? "justify-end pr-8" : "justify-center"}`}
-          style={{ zIndex: 40 }}
+          className="absolute flex justify-center"
+          style={
+            representLayout === "tens"
+              ? { zIndex: 40, right: 16, bottom: 24, width: 440 }
+              : { zIndex: 40, left: 0, right: 0, bottom: 24 }
+          }
         >
-          <div className={hasTens ? "" : "pr-[220px] pl-[220px]"}>
+          <div className={representLayout === "tens" ? "flex w-full justify-center" : "flex w-[620px] justify-center"}>
+
             <OperationBuilder
               representation={representation}
               filled={repFilled}
