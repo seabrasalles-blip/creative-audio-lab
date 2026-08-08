@@ -237,9 +237,12 @@ export function GameScreen() {
         </div>
       )}
 
-      {/* CENA MATEMÁTICA */}
+      {/* CENA MATEMÁTICA — faixa protegida */}
       {step.kind === "challenge" && (
-        <div className="absolute inset-x-0 top-[150px] flex justify-center" style={{ zIndex: 10 }}>
+        <div
+          className="absolute inset-x-0 flex justify-center overflow-visible"
+          style={{ zIndex: 10, top: hasTens ? 135 : 150, height: hasTens ? 295 : undefined }}
+        >
           <FishScene
             tens={step.challenge.tens}
             ones={step.challenge.ones}
@@ -248,6 +251,7 @@ export function GameScreen() {
             phase={phase}
             animationKey={animationKey}
             highlightRemaining={phase === "solved"}
+            compact={hasTens}
           />
         </div>
       )}
@@ -266,7 +270,10 @@ export function GameScreen() {
       )}
 
       {step.kind === "transition" && step.demo && (
-        <div className="absolute inset-x-0 top-[140px] flex justify-center" style={{ zIndex: 10 }}>
+        <div
+          className="absolute inset-x-0 flex justify-center overflow-visible"
+          style={{ zIndex: 10, top: hasTens ? 135 : 140, height: hasTens ? 295 : undefined }}
+        >
           <FishScene
             tens={step.demo.tens}
             ones={step.demo.ones}
@@ -274,6 +281,7 @@ export function GameScreen() {
             removeOnes={step.demo.removeOnes}
             phase={phase}
             animationKey={animationKey}
+            compact={hasTens}
           />
         </div>
       )}
@@ -292,8 +300,8 @@ export function GameScreen() {
             </p>
           </div>
           <div
-            className="absolute inset-x-0 top-[150px] flex justify-center"
-            style={{ zIndex: 10 }}
+            className="absolute inset-x-0 flex justify-center overflow-visible"
+            style={{ zIndex: 10, top: 135, height: 295 }}
           >
             <FishScene
               tens={3}
@@ -303,10 +311,12 @@ export function GameScreen() {
               phase="solved"
               animationKey={animationKey}
               highlightRemaining
+              compact
             />
           </div>
         </>
       )}
+
 
       {/* METACOGNIÇÃO */}
       {step.kind === "meta" && (
