@@ -19,6 +19,13 @@
  */
 
 @theme inline {
+  --font-body: "Lexend", system-ui, sans-serif;
+  --font-display: "Fredoka", "Lexend", system-ui, sans-serif;
+  --color-cream: var(--cream);
+  --color-navy: var(--navy);
+  --color-deep-sea: var(--deep-sea);
+  --color-leaf: var(--leaf);
+  --color-sand-deep: var(--sand-deep);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
