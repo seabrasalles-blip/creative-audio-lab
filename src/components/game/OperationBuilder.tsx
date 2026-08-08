@@ -39,15 +39,18 @@ export function OperationBuilder({
         aria-label={`Número que mostra ${roleLabel[role]}${v === null ? ": lacuna" : `: ${v}`}`}
         className={cn(
           "inline-flex items-center justify-center rounded-2xl bg-[var(--cream)] tabular-nums",
-          "border-[var(--navy)] text-[var(--navy)] font-display font-bold",
-          v === null ? "border-4 border-dashed" : "border-4",
-          isActive && "border-8 shadow-[0_0_0_4px_rgba(12,42,74,0.18)]",
+          "border-4 border-[var(--navy)] text-[var(--navy)] font-display font-bold",
+          v === null && "border-dashed",
         )}
         style={{
+          boxSizing: "border-box",
           minWidth: compact ? 92 : 108,
           height: compact ? 66 : 78,
           fontSize: numberSize,
           fontVariantNumeric: "tabular-nums",
+          // destaque sem alterar a geometria da lacuna ativa
+          outline: isActive ? "6px solid var(--navy)" : undefined,
+          outlineOffset: isActive ? "3px" : undefined,
         }}
       >
         {v === null ? "" : v}
