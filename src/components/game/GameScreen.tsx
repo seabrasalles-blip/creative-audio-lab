@@ -242,7 +242,7 @@ export function GameScreen() {
       {step.kind === "challenge" && (
         <div
           className="absolute inset-x-0 flex justify-center overflow-visible"
-          style={{ zIndex: 10, top: hasTens ? 135 : 150, height: hasTens ? 295 : undefined }}
+          style={{ zIndex: 10, top: hasTens ? 120 : 150, height: hasTens ? 290 : undefined }}
         >
           <FishScene
             tens={step.challenge.tens}
@@ -273,7 +273,7 @@ export function GameScreen() {
       {step.kind === "transition" && step.demo && (
         <div
           className="absolute inset-x-0 flex justify-center overflow-visible"
-          style={{ zIndex: 10, top: hasTens ? 135 : 140, height: hasTens ? 295 : undefined }}
+          style={{ zIndex: 10, top: hasTens ? 120 : 140, height: hasTens ? 290 : undefined }}
         >
           <FishScene
             tens={step.demo.tens}
@@ -302,7 +302,7 @@ export function GameScreen() {
           </div>
           <div
             className="absolute inset-x-0 flex justify-center overflow-visible"
-            style={{ zIndex: 10, top: 135, height: 295 }}
+            style={{ zIndex: 10, top: 120, height: 290 }}
           >
             <FishScene
               tens={3}
@@ -368,13 +368,13 @@ export function GameScreen() {
           style={{
             zIndex: 30,
             left: hasTens ? 200 : 210,
-            bottom: hasTens ? 24 : 178,
+            bottom: hasTens ? 18 : 178,
           }}
         >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
-            width={hasTens ? 460 : 560}
+            width={hasTens ? 500 : 560}
             onPlay={() => {
               if (speaking) {
                 stop();
