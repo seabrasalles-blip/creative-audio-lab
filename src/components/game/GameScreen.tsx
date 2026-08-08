@@ -495,13 +495,13 @@ export function GameScreen() {
           </button>
         )}
 
-        {((step.kind === "challenge" && phase === "represent" && repDone) ||
-          step.kind === "intro" ||
+        {(step.kind === "intro" ||
           step.kind === "transition" ||
           step.kind === "summary" ||
           (step.kind === "meta" && metaAnswered)) && (
           <AssetButton asset="next" width={190} label="Seguir para a próxima tela" onClick={goNext} />
         )}
+
 
         {step.kind === "final" && (
           <>
