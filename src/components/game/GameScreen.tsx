@@ -5,6 +5,7 @@ import { AssetButton } from "@/components/game/AssetButton";
 import { Character } from "@/components/game/Character";
 import { FishScene } from "@/components/game/FishScene";
 import { GameCanvas } from "@/components/game/GameCanvas";
+import { OperationBuilder } from "@/components/game/OperationBuilder";
 import { ProgressIndicator } from "@/components/game/ProgressIndicator";
 import { SceneDecor } from "@/components/game/SceneDecor";
 import { SpeechBubble } from "@/components/game/SpeechBubble";
@@ -13,7 +14,7 @@ import { scoredChallenges } from "@/data/challenges";
 import { flow } from "@/data/flow";
 import { useAssetPreload } from "@/hooks/useAssetPreload";
 import { useMaraVoice } from "@/hooks/useMaraVoice";
-import type { Phase, Speech } from "@/types/game";
+import type { Phase, RepRole, Speech } from "@/types/game";
 
 const TOTAL_CHALLENGES = scoredChallenges.length;
 
@@ -30,9 +31,18 @@ export function GameScreen() {
   const [animationKey, setAnimationKey] = useState(0);
   const [metaAnswered, setMetaAnswered] = useState(false);
   const [metaWrong, setMetaWrong] = useState(false);
+  const [repFilled, setRepFilled] = useState<Partial<Record<RepRole, number>>>({});
+  const [repFeedback, setRepFeedback] = useState<Speech | null>(null);
 
   const step = flow[stepIndex]!;
   const removeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const representTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Microetapa de representação simbólica (após o acerto). */
+  const representation = step.kind === "challenge" ? step.challenge.representation : null;
+  const activeBlank: RepRole | null =
+    representation?.blanks.find((role) => repFilled[role] === undefined) ?? null;
+  const repDone = representation !== null && activeBlank === null;
 
   const resetStepState = useCallback(() => {
     setPhase("observe");
@@ -41,12 +51,15 @@ export function GameScreen() {
     setHintVisible(false);
     setMetaAnswered(false);
     setMetaWrong(false);
+    setRepFilled({});
+    setRepFeedback(null);
     setAnimationKey((k) => k + 1);
   }, []);
 
   useEffect(
     () => () => {
       if (removeTimer.current) clearTimeout(removeTimer.current);
+      if (representTimer.current) clearTimeout(representTimer.current);
     },
     [],
   );
@@ -67,6 +80,9 @@ export function GameScreen() {
         return step.meta.question;
       case "challenge": {
         const c = step.challenge;
+        if (phase === "represent") {
+          return repFeedback ?? (repDone ? c.representation.done : c.representation.prompt);
+        }
         if (hintVisible) return c.hint;
         if (phase === "solved") return c.correct;
         if (phase === "question" && attempts > 0) {
@@ -75,7 +91,7 @@ export function GameScreen() {
         return c.observe;
       }
     }
-  }, [attempts, hintVisible, metaAnswered, metaWrong, phase, step]);
+  }, [attempts, hintVisible, metaAnswered, metaWrong, phase, repDone, repFeedback, step]);
 
   // Troca de tela/fala interrompe imediatamente o áudio anterior.
   // Nunca há reprodução automática: o áudio só começa por clique do estudante.
@@ -106,6 +122,9 @@ export function GameScreen() {
 
   const playRemoval = useCallback(() => {
     if (removeTimer.current) clearTimeout(removeTimer.current);
+    if (representTimer.current) clearTimeout(representTimer.current);
+    setRepFilled({});
+    setRepFeedback(null);
     setHintVisible(false);
     setSelectedAnswer(null);
     setAnimationKey((k) => k + 1);
@@ -119,18 +138,46 @@ export function GameScreen() {
 
   const answer = useCallback(
     (value: number) => {
-      if (step.kind !== "challenge" || phase === "solved") return;
+      if (step.kind !== "challenge" || phase === "solved" || phase === "represent") return;
       const c = step.challenge;
       setSelectedAnswer(value);
       setHintVisible(false);
       if (value === c.answer) {
         setPhase("solved");
+        if (representTimer.current) clearTimeout(representTimer.current);
+        // transição suave: feedback de acerto → área da operação
+        representTimer.current = setTimeout(() => setPhase("represent"), 450);
       } else {
         setAttempts((a) => a + 1);
         setAttemptsByQuestion((prev) => ({ ...prev, [c.id]: (prev[c.id] ?? 0) + 1 }));
       }
     },
     [phase, step],
+  );
+
+  /** Clique em um número da microetapa: preenche a lacuna ativa ou orienta sem penalizar. */
+  const chooseNumber = useCallback(
+    (value: number) => {
+      if (!representation || !activeBlank) return;
+      if (value === representation[activeBlank]) {
+        setRepFeedback(null);
+        setRepFilled((prev) => ({ ...prev, [activeBlank]: value }));
+        return;
+      }
+      const roleOfValue = (["initial", "removed", "result"] as RepRole[]).find(
+        (role) => representation[role] === value,
+      );
+      const meaning: Record<RepRole, string> = {
+        initial: "quantos havia no começo",
+        removed: "quantos saíram",
+        result: "quantos ficaram",
+      };
+      const text = roleOfValue
+        ? `O ${value} mostra ${meaning[roleOfValue]}. Qual número mostra ${meaning[activeBlank]}?`
+        : `Procure o número que mostra ${meaning[activeBlank]}.`;
+      setRepFeedback({ key: `${representation.prompt.key}-retry-${activeBlank}-${value}`, text });
+    },
+    [activeBlank, representation],
   );
 
   const background: BackgroundKey =
@@ -157,7 +204,7 @@ export function GameScreen() {
               ? metaAnswered
                 ? "celebrating"
                 : "thinking"
-              : phase === "solved"
+              : phase === "solved" || phase === "represent"
                 ? "celebrating"
                 : hintVisible || (phase === "question" && attempts > 0)
                   ? "feedback"
@@ -246,9 +293,9 @@ export function GameScreen() {
               ones={step.challenge.ones}
               removeTens={step.challenge.removeTens}
               removeOnes={step.challenge.removeOnes}
-              phase={phase}
+              phase={phase === "represent" ? "solved" : phase}
               animationKey={animationKey}
-              highlightRemaining={phase === "solved"}
+              highlightRemaining={phase === "solved" || phase === "represent"}
               compact={hasTens}
             />
           </div>
@@ -294,8 +341,11 @@ export function GameScreen() {
             className="w-[720px] rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
             style={{ zIndex: 40 }}
           >
+            <p className="font-body text-[24px] font-medium text-[var(--navy)]">
+              35 peixes · 23 saíram · 12 ficaram
+            </p>
             <p
-              className="font-display text-[40px] font-bold text-[var(--navy)]"
+              className="mt-1 font-display text-[40px] font-bold text-[var(--navy)]"
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
               35 − 23 = 12
@@ -392,7 +442,7 @@ export function GameScreen() {
         style={{ zIndex: 50, ...(hasTens ? { top: 20 } : { bottom: 24 }) }}
       >
 
-        {step.kind === "challenge" && phase !== "observe" && phase !== "solved" && (
+        {step.kind === "challenge" && (phase === "question" || phase === "removing") && (
           <AssetButton
             asset="hint"
             width={110}
@@ -421,7 +471,7 @@ export function GameScreen() {
           </button>
         )}
 
-        {((step.kind === "challenge" && phase === "solved") ||
+        {((step.kind === "challenge" && phase === "represent" && repDone) ||
           step.kind === "intro" ||
           step.kind === "transition" ||
           step.kind === "summary" ||
@@ -455,6 +505,24 @@ export function GameScreen() {
         </div>
       )}
 
+
+      {/* REPRESENTAÇÃO SIMBÓLICA — ocupa o lugar das alternativas */}
+      {step.kind === "challenge" && phase === "represent" && representation && (
+        <div
+          className={`absolute inset-x-0 bottom-[28px] flex ${hasTens ? "justify-end pr-8" : "justify-center"}`}
+          style={{ zIndex: 40 }}
+        >
+          <div className={hasTens ? "" : "pr-[220px] pl-[220px]"}>
+            <OperationBuilder
+              representation={representation}
+              filled={repFilled}
+              activeBlank={activeBlank}
+              onChoose={chooseNumber}
+              compact={hasTens}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Demonstração automática nas transições com cena */}
       {step.kind === "transition" && step.demo && phase === "observe" && (

@@ -33,6 +33,26 @@ const metaQuestions: MetaQuestion[] = [
     retry: { key: "meta-2-retry", text: "Lembre-se do cardume que você viu se formar." },
   },
   {
+    id: "m-rep",
+    question: {
+      key: "meta-rep",
+      text: "Na operação 18 − 5 = 13, o que o número 5 mostra?",
+    },
+    options: [
+      { label: "Quantos saíram.", correct: true },
+      { label: "Quantos havia.", correct: false },
+      { label: "Quantos ficaram.", correct: false },
+    ],
+    correct: {
+      key: "meta-rep-correct",
+      text: "Isso! O número depois do sinal de menos mostra quantos saíram.",
+    },
+    retry: {
+      key: "meta-rep-retry",
+      text: "Veja: 18 mostra quantos havia e 13 mostra quantos ficaram.",
+    },
+  },
+  {
     id: "m3",
     question: { key: "meta-3", text: "O que fazemos em uma situação de retirada?" },
     options: [
@@ -100,7 +120,7 @@ export const flow: Step[] = [
     id: "summary",
     speech: {
       key: "mara-summary",
-      text: "Subtrair é descobrir quanto resta quando uma parte é retirada.",
+      text: "A operação mostra com números o que aconteceu: 35 − 23 = 12.",
     },
   },
   ...metaQuestions.map((meta) => ({ kind: "meta" as const, id: meta.id, meta })),
