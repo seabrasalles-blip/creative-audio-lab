@@ -52,7 +52,7 @@ export function FishScene({
   return (
     <div
       key={animationKey}
-      className={`flex flex-col items-center justify-start ${compact ? "gap-3" : "gap-6"}`}
+      className={`flex flex-col items-center justify-start ${compact ? "gap-2" : "gap-6"}`}
       style={{ zIndex: 10 }}
     >
 

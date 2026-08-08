@@ -218,42 +218,43 @@ export function GameScreen() {
         </div>
       )}
 
-      {/* ENUNCIADO */}
+      {/* ZONA 1 + ZONA 2 — enunciado e cena em fluxo (nunca se intersectam) */}
       {step.kind === "challenge" && (
         <div
-          className="absolute left-1/2 top-6 -translate-x-1/2 rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
-          style={{ zIndex: 40, width: hasTens ? 660 : 820 }}
+          className="absolute inset-x-0 top-4 flex flex-col items-center"
+          style={{ zIndex: 10 }}
         >
-
-          <h1
-            className="font-body text-[30px] font-semibold text-[var(--navy)]"
-            style={{ lineHeight: 1.35 }}
+          <div
+            className="rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
+            style={{ zIndex: 40, width: hasTens ? 660 : 820 }}
           >
-            {phase === "observe"
-              ? step.challenge.tens > 0
-                ? "Observe os cardumes e os peixes do recife."
-                : "Observe quantos peixes há no recife."
-              : step.challenge.prompt}
-          </h1>
-        </div>
-      )}
+            <h1
+              className="font-body text-[30px] font-semibold text-[var(--navy)]"
+              style={{ lineHeight: 1.35 }}
+            >
+              {phase === "observe"
+                ? step.challenge.tens > 0
+                  ? "Observe os cardumes e os peixes do recife."
+                  : "Observe quantos peixes há no recife."
+                : step.challenge.prompt}
+            </h1>
+          </div>
 
-      {/* CENA MATEMÁTICA — faixa protegida */}
-      {step.kind === "challenge" && (
-        <div
-          className="absolute inset-x-0 flex justify-center overflow-visible"
-          style={{ zIndex: 10, top: hasTens ? 120 : 150, height: hasTens ? 290 : undefined }}
-        >
-          <FishScene
-            tens={step.challenge.tens}
-            ones={step.challenge.ones}
-            removeTens={step.challenge.removeTens}
-            removeOnes={step.challenge.removeOnes}
-            phase={phase}
-            animationKey={animationKey}
-            highlightRemaining={phase === "solved"}
-            compact={hasTens}
-          />
+          <div
+            className="mt-4 flex w-full justify-center overflow-visible"
+            style={{ zIndex: 10 }}
+          >
+            <FishScene
+              tens={step.challenge.tens}
+              ones={step.challenge.ones}
+              removeTens={step.challenge.removeTens}
+              removeOnes={step.challenge.removeOnes}
+              phase={phase}
+              animationKey={animationKey}
+              highlightRemaining={phase === "solved"}
+              compact={hasTens}
+            />
+          </div>
         </div>
       )}
 
@@ -288,9 +289,12 @@ export function GameScreen() {
       )}
 
       {step.kind === "summary" && (
-        <>
+        <div
+          className="absolute inset-x-0 top-4 flex flex-col items-center"
+          style={{ zIndex: 10 }}
+        >
           <div
-            className="absolute left-1/2 top-6 w-[720px] -translate-x-1/2 rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
+            className="w-[720px] rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
             style={{ zIndex: 40 }}
           >
             <p
@@ -300,10 +304,7 @@ export function GameScreen() {
               35 − 23 = 12
             </p>
           </div>
-          <div
-            className="absolute inset-x-0 flex justify-center overflow-visible"
-            style={{ zIndex: 10, top: 120, height: 290 }}
-          >
+          <div className="mt-4 flex w-full justify-center overflow-visible" style={{ zIndex: 10 }}>
             <FishScene
               tens={3}
               ones={5}
@@ -315,8 +316,9 @@ export function GameScreen() {
               compact
             />
           </div>
-        </>
+        </div>
       )}
+
 
 
       {/* METACOGNIÇÃO */}
@@ -356,7 +358,7 @@ export function GameScreen() {
         >
           <Character
             pose={pose}
-            height={step.kind === "final" ? 340 : hasTens ? 240 : 260}
+            height={step.kind === "final" ? 340 : hasTens ? 210 : 260}
           />
         </div>
       )}
@@ -367,14 +369,14 @@ export function GameScreen() {
           className="absolute"
           style={{
             zIndex: 30,
-            left: hasTens ? 200 : 210,
-            bottom: hasTens ? 18 : 178,
+            left: hasTens ? 120 : 210,
+            bottom: hasTens ? 12 : 178,
           }}
         >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
-            width={hasTens ? 460 : 560}
+            width={hasTens ? 600 : 560}
             onPlay={() => {
               if (speaking) {
                 stop();
