@@ -169,6 +169,16 @@ export function GameScreen() {
 
   const challengeNumber = step.kind === "challenge" ? step.challenge.number : null;
 
+  /**
+   * Composição condensada: telas cuja cena matemática usa cardumes (dezenas).
+   * A cena ocupa a faixa protegida Y 135–430 e a mediação vai para a faixa inferior.
+   */
+  const hasTens =
+    (step.kind === "challenge" && step.challenge.tens > 0) ||
+    step.kind === "summary" ||
+    (step.kind === "transition" && (step.demo?.tens ?? 0) > 0);
+
+
   if (!ready) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-[var(--deep-sea)]">
