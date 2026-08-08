@@ -223,6 +223,16 @@ export function GameScreen() {
     step.kind === "summary" ||
     (step.kind === "transition" && (step.demo?.tens ?? 0) > 0);
 
+  /** Composição própria da microetapa de representação simbólica. */
+  const isRepresent = step.kind === "challenge" && phase === "represent";
+  const representLayout: "tens" | "simple" | null = isRepresent
+    ? hasTens
+      ? "tens"
+      : "simple"
+    : null;
+
+
+
 
   if (!ready) {
     return (
@@ -401,11 +411,19 @@ export function GameScreen() {
       {step.kind !== "cover" && (
         <div
           className="absolute left-6"
-          style={{ zIndex: 20, bottom: hasTens ? 0 : 10 }}
+          style={{ zIndex: 20, bottom: representLayout ? 0 : hasTens ? 0 : 10 }}
         >
           <Character
             pose={pose}
-            height={step.kind === "final" ? 340 : hasTens ? 210 : 260}
+            height={
+              step.kind === "final"
+                ? 340
+                : representLayout === "simple"
+                  ? 235
+                  : hasTens
+                    ? 210
+                    : 260
+            }
           />
         </div>
       )}
@@ -416,15 +434,21 @@ export function GameScreen() {
           className="absolute"
           style={{
             zIndex: 30,
-            left: hasTens ? 100 : 210,
-            bottom: hasTens ? 8 : 178,
+            ...(representLayout === "simple"
+              ? { left: 220, bottom: 245 }
+              : representLayout === "tens"
+                ? { left: 190, bottom: 10 }
+
+                : { left: hasTens ? 100 : 210, bottom: hasTens ? 8 : 178 }),
           }}
         >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
             finished={finished}
-            width={hasTens ? 620 : 560}
+            width={
+              representLayout === "simple" ? 520 : representLayout === "tens" ? 510 : hasTens ? 620 : 560
+            }
             onPlay={() => {
               if (speaking) {
                 stop();
@@ -506,13 +530,19 @@ export function GameScreen() {
       )}
 
 
-      {/* REPRESENTAÇÃO SIMBÓLICA — ocupa o lugar das alternativas */}
+      {/* ZONA C — REPRESENTAÇÃO SIMBÓLICA (composição própria da fase) */}
       {step.kind === "challenge" && phase === "represent" && representation && (
         <div
-          className={`absolute inset-x-0 bottom-[28px] flex ${hasTens ? "justify-end pr-8" : "justify-center"}`}
-          style={{ zIndex: 40 }}
+          className="absolute flex justify-center"
+          style={
+            representLayout === "tens"
+              ? { zIndex: 40, right: 16, bottom: 24, width: 440 }
+              : { zIndex: 40, left: 470, right: 20, bottom: 24 }
+
+          }
         >
-          <div className={hasTens ? "" : "pr-[220px] pl-[220px]"}>
+          <div className="flex w-full justify-center">
+
             <OperationBuilder
               representation={representation}
               filled={repFilled}
