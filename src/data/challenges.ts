@@ -1,4 +1,4 @@
-import { ficou, grupo, havia, retomada, saiu } from "@/lib/pt";
+import { ficou, havia, retomada, saiu } from "@/lib/pt";
 import type { Challenge, RepRole } from "@/types/game";
 
 type Seed = {
