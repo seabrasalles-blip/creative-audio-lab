@@ -3,6 +3,8 @@ import type { RepRole, Representation } from "@/types/game";
 
 type Props = {
   representation: Representation;
+  /** ordem estável já embaralhada; cai para representation.choices se ausente */
+  choices?: number[];
   filled: Partial<Record<RepRole, number>>;
   activeBlank: RepRole | null;
   onChoose: (value: number) => void;
@@ -21,11 +23,13 @@ const roleLabel: Record<RepRole, string> = {
  */
 export function OperationBuilder({
   representation,
+  choices,
   filled,
   activeBlank,
   onChoose,
   compact = false,
 }: Props) {
+  const numbers = choices ?? representation.choices;
   const value = (role: RepRole) =>
     representation.blanks.includes(role) ? (filled[role] ?? null) : representation[role];
 
@@ -78,9 +82,9 @@ export function OperationBuilder({
         <Slot role="result" />
       </div>
 
-      {activeBlank && representation.choices.length > 0 && (
+      {activeBlank && numbers.length > 0 && (
         <div className={cn("flex items-center justify-center", compact ? "gap-3" : "gap-4")}>
-          {representation.choices.map((choice) => (
+          {numbers.map((choice) => (
             <button
               key={choice}
               type="button"

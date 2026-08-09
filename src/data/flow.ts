@@ -108,7 +108,7 @@ export const flow: Step[] = [
     demo: { tens: 2, ones: 3, removeTens: 1, removeOnes: 1 },
     speech: {
       key: "mara-transition-groups",
-      text: "Agora podem sair cardumes inteiros e também alguns peixes separados. Ficaram 1 cardume e 2 peixes: 12.",
+      text: "Agora podem sair cardumes inteiros e também alguns peixes separados. Ficou 1 cardume e 2 peixes: 12.",
     },
   },
   { kind: "challenge", id: "c9", challenge: byId("c9") },

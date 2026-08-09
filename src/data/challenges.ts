@@ -1,3 +1,4 @@
+import { ficou, havia, retomada, saiu } from "@/lib/pt";
 import type { Challenge, RepRole } from "@/types/game";
 
 type Seed = {
@@ -8,9 +9,12 @@ type Seed = {
   removeTens: number;
   removeOnes: number;
   options: number[];
+  /** dica: sempre uma estratégia, nunca a resposta */
   hint: string;
+  /** fala de observação: orienta a atenção, nunca entrega a quantidade */
   observe: string;
-  correct: string;
+  /** abertura do feedback de acerto (a retomada numérica é gerada) */
+  abertura: string;
   errors: string[];
 };
 
@@ -23,11 +27,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 1,
     options: [2, 3, 4],
-    hint: "Conte somente os peixes que continuam no recife.",
-    observe:
-      "Primeiro veja quantos há. Depois observe quantos saem. Por fim, descubra quantos ficaram.",
-    correct: "Isso mesmo! Havia 3 peixes, 1 saiu e ficaram 2.",
-    errors: ["Observe novamente os peixes que ficaram no recife."],
+    hint: "Você pode apontar para cada peixe enquanto conta.",
+    observe: "Olhe com atenção para o recife e conte com calma.",
+    abertura: "Isso mesmo!",
+    errors: ["Observe novamente. Conte os peixes que ficaram."],
   },
   {
     id: "c1",
@@ -37,10 +40,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 1,
     options: [3, 4, 5],
-    hint: "Conte primeiro os que ficaram.",
-    observe: "Havia 5 peixes no recife. Veja quantos saem.",
-    correct: "Muito bem! Eram 5 peixes, saiu 1 e ficaram 4.",
-    errors: ["Veja quantos saíram do grupo e conte de novo os que ficaram."],
+    hint: "Conte somente os peixes que ainda estão no recife.",
+    observe: "Conte com calma antes de continuar.",
+    abertura: "Muito bem!",
+    errors: ["Observe novamente. Conte os peixes que ficaram."],
   },
   {
     id: "c2",
@@ -50,10 +53,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 2,
     options: [4, 5, 6],
-    hint: "Toque nos peixes com o olhar e conte um por um.",
-    observe: "Havia 6 peixes no recife. Veja quantos saem.",
-    correct: "Isso! Eram 6 peixes, saíram 2 e ficaram 4.",
-    errors: ["Você encontrou quantos saíram. Agora descubra quantos ficaram."],
+    hint: "Você pode apontar para cada peixe enquanto conta.",
+    observe: "Quantos peixes você consegue contar?",
+    abertura: "Isso!",
+    errors: ["Quase! Conte apenas os peixes que permaneceram no recife."],
   },
   {
     id: "c3",
@@ -63,10 +66,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 3,
     options: [5, 6, 11],
-    hint: "Na subtração, contamos apenas o que permaneceu.",
-    observe: "Havia 8 peixes no recife. Veja quantos saem.",
-    correct: "Exato! Eram 8 peixes, saíram 3 e ficaram 5.",
-    errors: ["Conte somente os que permaneceram no recife."],
+    hint: "Neste desafio, queremos descobrir quantos ficaram. Observe os peixes que permaneceram no recife.",
+    observe: "Olhe com atenção para o recife.",
+    abertura: "Exato!",
+    errors: ["Observe novamente os peixes que ficaram no recife."],
   },
   {
     id: "c4",
@@ -76,10 +79,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 4,
     options: [4, 5, 6],
-    hint: "Olhe para o grupo que continua no recife.",
-    observe: "Havia 9 peixes no recife. Veja quantos saem.",
-    correct: "Isso mesmo! Eram 9 peixes, saíram 4 e ficaram 5.",
-    errors: ["Observe novamente os peixes que ficaram."],
+    hint: "Conte primeiro os peixes que ficaram, um de cada vez.",
+    observe: "Conte com calma. Depois veja o que acontece.",
+    abertura: "Isso mesmo!",
+    errors: ["Quase! Conte apenas os peixes que permaneceram no recife."],
   },
   {
     id: "c5",
@@ -89,10 +92,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 2,
     options: [10, 11, 12],
-    hint: "Lembre-se: cada cardume tem 10 peixes.",
-    observe: "Havia 1 cardume e 2 peixes separados. Veja quantos saem.",
-    correct: "Muito bem! Ficou 1 cardume inteiro: 10 peixes.",
-    errors: ["Observe primeiro o cardume. Depois os peixes separados."],
+    hint: "Cada cardume vale 10. Conte o cardume e junte os peixes separados.",
+    observe: "Comece pelos cardumes e depois olhe os peixes separados.",
+    abertura: "Muito bem!",
+    errors: ["Observe novamente. Comece pelo cardume."],
   },
   {
     id: "c6",
@@ -102,10 +105,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 3,
     options: [10, 11, 12],
-    hint: "Comece pelo cardume e depois conte os peixes separados.",
-    observe: "Havia 1 cardume e 4 peixes separados. Veja quantos saem.",
-    correct: "Isso! Ficou 1 cardume e 1 peixe: 11.",
-    errors: ["Conte o cardume como 10 e junte os peixes que ficaram."],
+    hint: "Conte o cardume como 10 e junte os peixes que ficaram.",
+    observe: "Olhe primeiro o cardume. Depois os peixes separados.",
+    abertura: "Isso!",
+    errors: ["Quase! Veja quais peixes separados ainda estão no recife."],
   },
   {
     id: "c7",
@@ -115,10 +118,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 4,
     options: [11, 12, 13],
-    hint: "Observe um cardume de cada vez.",
-    observe: "Havia 1 cardume e 6 peixes separados. Veja quantos saem.",
-    correct: "Exato! Ficou 1 cardume e 2 peixes: 12.",
-    errors: ["Veja quais peixes separados ainda estão no recife."],
+    hint: "Comece pelo cardume e depois conte os peixes separados.",
+    observe: "Observe o recife com calma.",
+    abertura: "Exato!",
+    errors: ["Observe novamente os peixes separados que ficaram."],
   },
   {
     id: "c8",
@@ -129,9 +132,9 @@ const seeds: Seed[] = [
     removeOnes: 5,
     options: [12, 13, 14],
     hint: "O cardume continua inteiro. Conte só os peixes separados.",
-    observe: "Havia 1 cardume e 8 peixes separados. Veja quantos saem.",
-    correct: "Muito bem! Ficou 1 cardume e 3 peixes: 13.",
-    errors: ["Observe primeiro o cardume. Quantos peixes ficaram ao lado dele?"],
+    observe: "Comece pelos cardumes. Depois conte os peixes separados.",
+    abertura: "Muito bem!",
+    errors: ["Quase! Conte o cardume e junte os peixes que ficaram."],
   },
   {
     id: "c9",
@@ -141,10 +144,10 @@ const seeds: Seed[] = [
     removeTens: 1,
     removeOnes: 0,
     options: [10, 11, 20],
-    hint: "Um cardume inteiro saiu. Quantos cardumes ficaram?",
-    observe: "Havia 2 cardumes e 1 peixe separado. Veja o que sai.",
-    correct: "Isso mesmo! Ficou 1 cardume e 1 peixe: 11.",
-    errors: ["Observe primeiro os cardumes. Quantos deles ainda estão no recife?"],
+    hint: "Veja quantos cardumes continuam no recife.",
+    observe: "Olhe com atenção para os cardumes.",
+    abertura: "Isso mesmo!",
+    errors: ["Observe novamente. Quantos cardumes ainda estão no recife?"],
   },
   {
     id: "c10",
@@ -155,9 +158,9 @@ const seeds: Seed[] = [
     removeOnes: 2,
     options: [11, 12, 14],
     hint: "Conte os cardumes que ficaram e depois os peixes separados.",
-    observe: "Havia 2 cardumes e 4 peixes separados. Veja o que sai.",
-    correct: "Exato! Ficou 1 cardume e 2 peixes: 12.",
-    errors: ["Veja os cardumes que permaneceram e some os peixes separados."],
+    observe: "Comece pelos cardumes.",
+    abertura: "Exato!",
+    errors: ["Quase! Some os cardumes que ficaram com os peixes separados."],
   },
   {
     id: "c11",
@@ -168,9 +171,9 @@ const seeds: Seed[] = [
     removeOnes: 3,
     options: [12, 13, 22],
     hint: "Cada cardume que ficou vale 10 peixes.",
-    observe: "Havia 3 cardumes e 5 peixes separados. Veja o que sai.",
-    correct: "Muito bem! Ficou 1 cardume e 2 peixes: 12.",
-    errors: ["Observe primeiro os cardumes. Depois conte os peixes separados."],
+    observe: "Olhe primeiro os cardumes. Depois os peixes separados.",
+    abertura: "Muito bem!",
+    errors: ["Observe novamente. Conte os cardumes que permaneceram."],
   },
   {
     id: "c12",
@@ -181,10 +184,9 @@ const seeds: Seed[] = [
     removeOnes: 4,
     options: [20, 22, 24],
     hint: "Conte os cardumes que ficaram e depois os peixes que ficaram.",
-    observe: "Havia 4 cardumes e 6 peixes separados. Veja o que sai.",
-    correct:
-      "Isso mesmo! Havia 4 cardumes e 6 peixes. Saíram 2 cardumes e 4 peixes. Ficaram 2 cardumes e 2 peixes: 22.",
-    errors: ["Observe primeiro os cardumes. Quantos deles ainda estão no recife?"],
+    observe: "Conte com calma: primeiro os cardumes, depois os peixes.",
+    abertura: "Isso mesmo!",
+    errors: ["Quase! Quantos cardumes ainda estão no recife?"],
   },
 ];
 
@@ -200,20 +202,22 @@ type RepSeed = {
   done: string;
 };
 
+const SINAL = "Nesta situação, o sinal de menos representa a quantidade que saiu.";
+
 const repSeeds: Record<string, RepSeed> = {
   tutorial: {
     level: 0,
     blanks: [],
     choices: [],
-    prompt: "Podemos mostrar com números: havia 3, 1 saiu e ficaram 2.",
-    done: "O sinal de menos mostra que uma quantidade foi retirada.",
+    prompt: "Podemos mostrar com números: havia 3, saiu 1 e ficaram 2.",
+    done: SINAL,
   },
   c1: {
     level: 0,
     blanks: [],
     choices: [],
-    prompt: "Podemos mostrar com números o que aconteceu. Havia 5 peixes, 1 saiu e ficaram 4.",
-    done: "O sinal de menos mostra que uma quantidade foi retirada.",
+    prompt: "Podemos mostrar com números: havia 5, saiu 1 e ficaram 4.",
+    done: SINAL,
   },
   c2: {
     level: 0,
@@ -294,16 +298,12 @@ const repSeeds: Record<string, RepSeed> = {
   },
 };
 
-function describe(tens: number, ones: number) {
-  const parts: string[] = [];
-  if (tens > 0) parts.push(tens === 1 ? "1 cardume" : `${tens} cardumes`);
-  if (ones > 0) parts.push(ones === 1 ? "1 peixe" : `${ones} peixes`);
-  return parts.join(" e ");
-}
-
 export const challenges: Challenge[] = seeds.map((s) => {
   const total = s.tens * 10 + s.ones;
   const removed = s.removeTens * 10 + s.removeOnes;
+  const result = total - removed;
+  const restTens = s.tens - s.removeTens;
+  const restOnes = s.ones - s.removeOnes;
   return {
     id: s.id,
     number: s.number,
@@ -313,22 +313,25 @@ export const challenges: Challenge[] = seeds.map((s) => {
     removeOnes: s.removeOnes,
     prompt:
       s.tens > 0
-        ? `Havia ${describe(s.tens, s.ones)}. Saíram ${describe(
-            s.removeTens,
-            s.removeOnes,
-          )}. Quantos peixes ficaram?`
-        : `Havia ${total} peixes. Saíram ${removed}. Quantos ficaram?`,
+        ? `${havia(s.tens, s.ones)}. ${saiu(s.removeTens, s.removeOnes)}. Quantos peixes ficaram?`
+        : `${havia(0, s.ones)}. ${saiu(0, s.removeOnes)}. Quantos ficaram?`,
     options: s.options,
-    answer: total - removed,
+    answer: result,
     hint: { key: `${s.id}-hint`, text: s.hint },
     observe: { key: `${s.id}-observe`, text: s.observe },
-    correct: { key: `${s.id}-correct`, text: s.correct },
+    correct: {
+      key: `${s.id}-correct`,
+      text:
+        s.tens > 0
+          ? `${retomada(s.abertura, total, removed, result)} ${ficou(restTens, restOnes)}.`
+          : retomada(s.abertura, total, removed, result),
+    },
     errors: s.errors.map((text, i) => ({ key: `${s.id}-error-${i + 1}`, text })),
     representation: {
       level: repSeeds[s.id]!.level,
       initial: total,
       removed,
-      result: total - removed,
+      result,
       blanks: repSeeds[s.id]!.blanks,
       choices: repSeeds[s.id]!.choices,
       prompt: { key: `${s.id}-rep`, text: repSeeds[s.id]!.prompt },

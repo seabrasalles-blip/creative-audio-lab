@@ -1,6 +1,16 @@
+import { useMemo } from "react";
+
 import { AssetButton } from "@/components/game/AssetButton";
 import { Character } from "@/components/game/Character";
 import type { MetaQuestion, Speech } from "@/types/game";
+
+/** Posição da alternativa correta em cada questão (0-based), balanceada. */
+const correctPosition: Record<string, number> = {
+  m1: 1,
+  m2: 2,
+  "m-rep": 0,
+  m3: 2,
+};
 
 /**
  * Composição exclusiva da metacognição (canvas lógico 1200 × 675).
@@ -32,6 +42,17 @@ export function MetacognitionScreen({
   onPlay: () => void;
   onNext: () => void;
 }) {
+  // Posições balanceadas, definidas uma única vez por questão: a alternativa correta
+  // muda de lugar entre as questões e permanece estável durante tentativas e erros.
+  const options = useMemo(() => {
+    const target = correctPosition[meta.id] ?? 1;
+    const correct = meta.options.filter((o) => o.correct);
+    const others = meta.options.filter((o) => !o.correct);
+    const out = [...others];
+    out.splice(Math.min(target, out.length), 0, ...correct);
+    return out;
+  }, [meta.id, meta.options]);
+
   return (
     <>
       {/* ZONA ESQUERDA — balão com a pergunta (é o próprio enunciado) */}
@@ -77,7 +98,7 @@ export function MetacognitionScreen({
         role="group"
         aria-label="Alternativas"
       >
-        {meta.options.map((option) => {
+        {options.map((option) => {
           const isCorrect = answered && option.correct;
           return (
             <button
