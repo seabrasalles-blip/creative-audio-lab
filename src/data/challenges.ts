@@ -342,4 +342,3 @@ export const challenges: Challenge[] = seeds.map((s) => {
 
 export const tutorial = challenges[0]!;
 export const scoredChallenges = challenges.filter((c) => c.number !== null);
-export { grupo };
