@@ -263,6 +263,7 @@ export function GameScreen() {
       : "simple"
     : null;
 
+  const maraRef = useRef<HTMLDivElement>(null);
   /**
    * Regra geral de composição da zona inferior esquerda:
    * [MARA] 22px [BALÃO + ÁUDIO]. A largura real da personagem é medida em
