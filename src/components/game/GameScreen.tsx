@@ -440,9 +440,10 @@ export function GameScreen() {
         />
       )}
 
-      {/* MARA */}
+      {/* MARA — área protegida no canto inferior esquerdo */}
       {step.kind !== "cover" && step.kind !== "meta" && (
         <div
+          ref={maraRef}
           className="absolute left-6"
           style={{ zIndex: 20, bottom: representLayout ? 0 : hasTens ? 0 : 10 }}
         >
@@ -462,27 +463,28 @@ export function GameScreen() {
       )}
 
 
-      {/* BALÃO DE FALA */}
+      {/* BALÃO DE FALA — sempre à direita da área ocupada pela Mara */}
       {currentSpeech && step.kind !== "meta" && (
         <div
           className="absolute"
           style={{
             zIndex: 30,
-            ...(representLayout === "simple"
-              ? { left: 220, bottom: 245 }
-              : representLayout === "tens"
-                ? { left: 190, bottom: 10 }
-
-                : { left: hasTens ? 100 : 210, bottom: hasTens ? 8 : 178 }),
+            left: bubbleLeft,
+            width: bubbleWidth,
+            bottom:
+              representLayout === "simple"
+                ? 245
+                : representLayout === "tens"
+                  ? 10
+                  : hasTens
+                    ? 8
+                    : 178,
           }}
         >
           <SpeechBubble
             text={currentSpeech.text}
             speaking={speaking}
             finished={finished}
-            width={
-              representLayout === "simple" ? 520 : representLayout === "tens" ? 510 : hasTens ? 500 : 560
-            }
             onPlay={() => {
               if (speaking) {
                 stop();
