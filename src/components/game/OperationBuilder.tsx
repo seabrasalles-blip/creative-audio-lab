@@ -3,6 +3,8 @@ import type { RepRole, Representation } from "@/types/game";
 
 type Props = {
   representation: Representation;
+  /** ordem estável já embaralhada; cai para representation.choices se ausente */
+  choices?: number[];
   filled: Partial<Record<RepRole, number>>;
   activeBlank: RepRole | null;
   onChoose: (value: number) => void;
