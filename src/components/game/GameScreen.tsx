@@ -62,13 +62,16 @@ export function GameScreen() {
    * Ordem das opções numéricas embaralhada uma única vez por desafio:
    * a posição não pode entregar a resposta, e não muda após um erro.
    */
-  const repChoices = useMemo(
-    () =>
-      representation
-        ? stableShuffle(representation.choices, `${step.id}-${representation.choices.join("-")}`)
-        : [],
-    [representation, step.id],
-  );
+  const repChoices = useMemo(() => {
+    if (!representation) return [];
+    const original = representation.choices;
+    if (original.length < 2) return original;
+    const shuffled = stableShuffle(original, `${step.id}-${original.join("-")}`);
+    // nunca manter a mesma ordem das lacunas: a posição não pode entregar a resposta
+    return shuffled.every((v, i) => v === original[i])
+      ? [...shuffled.slice(1), shuffled[0]!]
+      : shuffled;
+  }, [representation, step.id]);
 
   const resetStepState = useCallback(() => {
     clearInteractionTimers();
