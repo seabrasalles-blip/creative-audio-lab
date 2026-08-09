@@ -314,7 +314,7 @@ export function GameScreen() {
         >
           <div
             className="rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
-            style={{ zIndex: 40, width: hasTens ? 660 : 740 }}
+            style={{ zIndex: 40, width: hasTens ? 660 : 700 }}
           >
             <h1
               className="font-body text-[30px] font-semibold text-[var(--navy)]"
