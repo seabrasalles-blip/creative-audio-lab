@@ -274,7 +274,9 @@ export function GameScreen() {
   }
 
   return (
-    <GameCanvas background={background}>
+    <>
+      <OrientationGuard />
+      <GameCanvas background={background}>
       {step.kind !== "cover" && <SceneDecor />}
 
       {/* CAPA */}
@@ -625,9 +627,8 @@ export function GameScreen() {
             }.`
           : ""}
       </p>
-
-      <OrientationGuard />
-    </GameCanvas>
+      </GameCanvas>
+    </>
   );
 }
 
