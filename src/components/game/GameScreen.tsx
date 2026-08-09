@@ -481,7 +481,7 @@ export function GameScreen() {
             speaking={speaking}
             finished={finished}
             width={
-              representLayout === "simple" ? 520 : representLayout === "tens" ? 510 : hasTens ? 620 : 560
+              representLayout === "simple" ? 520 : representLayout === "tens" ? 510 : hasTens ? 560 : 560
             }
             onPlay={() => {
               if (speaking) {
@@ -509,7 +509,7 @@ export function GameScreen() {
           />
         )}
 
-        {step.kind === "challenge" && phase === "solved" && (
+        {step.kind === "challenge" && phase === "solved" && !hasTens && (
           <button
             type="button"
             onClick={() => {
@@ -557,6 +557,23 @@ export function GameScreen() {
           </>
         )}
       </div>
+
+      {/* CONTINUAÇÃO APÓS O ACERTO — zona própria nas telas com cardumes */}
+      {step.kind === "challenge" && phase === "solved" && hasTens && (
+        <div className="absolute animate-scale-in" style={{ zIndex: 50, right: 24, bottom: 152 }}>
+          <button
+            type="button"
+            onClick={() => {
+              clearInteractionTimers();
+              setPhase("represent");
+            }}
+            aria-label="Mostrar com números o que aconteceu"
+            className="cursor-pointer rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-6 py-4 font-body text-[26px] font-semibold text-[var(--navy)] shadow-[0_3px_0_rgba(12,42,74,0.2)] transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--navy)]"
+          >
+            Mostrar com números
+          </button>
+        </div>
+      )}
 
       {/* ALTERNATIVAS */}
       {step.kind === "challenge" && (phase === "question" || phase === "solved") && (
