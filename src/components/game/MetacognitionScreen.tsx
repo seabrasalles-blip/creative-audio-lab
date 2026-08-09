@@ -1,5 +1,8 @@
+import { useMemo } from "react";
+
 import { AssetButton } from "@/components/game/AssetButton";
 import { Character } from "@/components/game/Character";
+import { stableShuffle } from "@/lib/shuffle";
 import type { MetaQuestion, Speech } from "@/types/game";
 
 /**
@@ -32,6 +35,10 @@ export function MetacognitionScreen({
   onPlay: () => void;
   onNext: () => void;
 }) {
+  // Ordem embaralhada uma única vez por questão: estável durante tentativas e erros,
+  // e a resposta correta não ocupa sempre a mesma posição.
+  const options = useMemo(() => stableShuffle(meta.options, meta.id), [meta.id, meta.options]);
+
   return (
     <>
       {/* ZONA ESQUERDA — balão com a pergunta (é o próprio enunciado) */}
@@ -77,7 +84,7 @@ export function MetacognitionScreen({
         role="group"
         aria-label="Alternativas"
       >
-        {meta.options.map((option) => {
+        {options.map((option) => {
           const isCorrect = answered && option.correct;
           return (
             <button
