@@ -58,6 +58,18 @@ export function GameScreen() {
     representation?.blanks.find((role) => repFilled[role] === undefined) ?? null;
   const repDone = representation !== null && activeBlank === null;
 
+  /**
+   * Ordem das opções numéricas embaralhada uma única vez por desafio:
+   * a posição não pode entregar a resposta, e não muda após um erro.
+   */
+  const repChoices = useMemo(
+    () =>
+      representation
+        ? stableShuffle(representation.choices, `${step.id}-${representation.choices.join("-")}`)
+        : [],
+    [representation, step.id],
+  );
+
   const resetStepState = useCallback(() => {
     clearInteractionTimers();
     setPhase("observe");
@@ -90,7 +102,14 @@ export function GameScreen() {
       case "challenge": {
         const c = step.challenge;
         if (phase === "represent") {
-          return repFeedback ?? (repDone ? c.representation.done : c.representation.prompt);
+          if (repFeedback) return repFeedback;
+          if (repDone) return c.representation.done;
+          const p0 = c.representation.prompt;
+          const noneFilled = Object.keys(repFilled).length === 0;
+          // Ponte entre a situação concreta e a escrita matemática.
+          return noneFilled
+            ? { key: `${p0.key}-bridge`, text: `Vamos mostrar com números. ${p0.text}` }
+            : p0;
         }
         if (hintVisible) return c.hint;
         if (phase === "solved") return c.correct;
@@ -100,7 +119,7 @@ export function GameScreen() {
         return c.observe;
       }
     }
-  }, [attempts, hintVisible, metaAnswered, metaWrong, phase, repDone, repFeedback, step]);
+  }, [attempts, hintVisible, metaAnswered, metaWrong, phase, repDone, repFeedback, repFilled, step]);
 
   // Troca de tela/fala interrompe imediatamente o áudio anterior.
   // Nunca há reprodução automática: o áudio só começa por clique do estudante.
@@ -290,7 +309,7 @@ export function GameScreen() {
         >
           <div
             className="rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-8 py-4 text-center"
-            style={{ zIndex: 40, width: hasTens ? 660 : 820 }}
+            style={{ zIndex: 40, width: hasTens ? 660 : 740 }}
           >
             <h1
               className="font-body text-[30px] font-semibold text-[var(--navy)]"
@@ -485,6 +504,21 @@ export function GameScreen() {
           />
         )}
 
+        {step.kind === "challenge" && phase === "solved" && (
+          <button
+            type="button"
+            onClick={() => {
+              if (phase !== "solved") return;
+              clearInteractionTimers();
+              setPhase("represent");
+            }}
+            aria-label="Mostrar com números o que aconteceu"
+            className="animate-scale-in cursor-pointer rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)] px-6 py-4 font-body text-[26px] font-semibold text-[var(--navy)] shadow-[0_3px_0_rgba(12,42,74,0.2)] transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[var(--navy)]"
+          >
+            Mostrar com números
+          </button>
+        )}
+
         {step.kind === "challenge" && phase === "observe" && (
           <AssetButton
             asset="next"
@@ -553,6 +587,7 @@ export function GameScreen() {
 
             <OperationBuilder
               representation={representation}
+              choices={repChoices}
               filled={repFilled}
               activeBlank={activeBlank}
               onChoose={chooseNumber}
@@ -590,6 +625,8 @@ export function GameScreen() {
             }.`
           : ""}
       </p>
+
+      <OrientationGuard />
     </GameCanvas>
   );
 }
