@@ -481,7 +481,7 @@ export function GameScreen() {
             speaking={speaking}
             finished={finished}
             width={
-              representLayout === "simple" ? 520 : representLayout === "tens" ? 510 : hasTens ? 560 : 560
+              representLayout === "simple" ? 520 : representLayout === "tens" ? 510 : hasTens ? 500 : 560
             }
             onPlay={() => {
               if (speaking) {
