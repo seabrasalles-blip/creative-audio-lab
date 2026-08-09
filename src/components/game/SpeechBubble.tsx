@@ -6,7 +6,7 @@ export function SpeechBubble({
   onPlay,
   speaking,
   finished = false,
-  width = 560,
+  width,
 }: {
   text: string;
   onPlay: () => void;
@@ -15,7 +15,7 @@ export function SpeechBubble({
   width?: number;
 }) {
   return (
-    <div className="flex items-end gap-3" style={{ width }}>
+    <div className="flex w-full items-end gap-3" style={width ? { width } : undefined}>
       <div className="relative flex-1 rounded-[28px] border-4 border-[var(--navy)] bg-[var(--cream)] px-7 py-5 shadow-[0_4px_0_rgba(12,42,74,0.18)]">
         <p
           className="font-body text-[28px] font-medium text-[var(--navy)]"
