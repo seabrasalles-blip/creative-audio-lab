@@ -13,6 +13,8 @@ import { SpeechBubble } from "@/components/game/SpeechBubble";
 import { preloadList, type BackgroundKey, type MaraPose } from "@/data/assets";
 import { scoredChallenges } from "@/data/challenges";
 import { flow } from "@/data/flow";
+import { OrientationGuard } from "@/components/game/OrientationGuard";
+import { stableShuffle } from "@/lib/shuffle";
 import { useAssetPreload } from "@/hooks/useAssetPreload";
 import { useMaraVoice } from "@/hooks/useMaraVoice";
 import type { Phase, RepRole, Speech } from "@/types/game";
@@ -36,8 +38,19 @@ export function GameScreen() {
   const [repFeedback, setRepFeedback] = useState<Speech | null>(null);
 
   const step = flow[stepIndex]!;
-  const removeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const representTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  /** Cancela todos os timers da etapa atual (retirada, demonstração, transições). */
+  const clearInteractionTimers = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  }, []);
+
+  const schedule = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(fn, ms);
+    timers.current.push(id);
+    return id;
+  }, []);
 
   /** Microetapa de representação simbólica (após o acerto). */
   const representation = step.kind === "challenge" ? step.challenge.representation : null;
@@ -46,6 +59,7 @@ export function GameScreen() {
   const repDone = representation !== null && activeBlank === null;
 
   const resetStepState = useCallback(() => {
+    clearInteractionTimers();
     setPhase("observe");
     setSelectedAnswer(null);
     setAttempts(0);
@@ -55,15 +69,9 @@ export function GameScreen() {
     setRepFilled({});
     setRepFeedback(null);
     setAnimationKey((k) => k + 1);
-  }, []);
+  }, [clearInteractionTimers]);
 
-  useEffect(
-    () => () => {
-      if (removeTimer.current) clearTimeout(removeTimer.current);
-      if (representTimer.current) clearTimeout(representTimer.current);
-    },
-    [],
-  );
+  useEffect(() => () => clearInteractionTimers(), [clearInteractionTimers]);
 
   /** Fala atual: sempre visível em texto e sempre reproduzível em áudio. */
   const currentSpeech: Speech | null = useMemo(() => {
@@ -103,27 +111,29 @@ export function GameScreen() {
 
 
   const goNext = useCallback(() => {
+    clearInteractionTimers();
     stop();
     setStepIndex((i) => Math.min(i + 1, flow.length - 1));
     resetStepState();
-  }, [resetStepState, stop]);
+  }, [clearInteractionTimers, resetStepState, stop]);
 
   const goBack = useCallback(() => {
+    clearInteractionTimers();
     stop();
     setStepIndex((i) => Math.max(i - 1, 0));
     resetStepState();
-  }, [resetStepState, stop]);
+  }, [clearInteractionTimers, resetStepState, stop]);
 
   const restart = useCallback(() => {
+    clearInteractionTimers();
     stop();
     setStepIndex(0);
     setAttemptsByQuestion({});
     resetStepState();
-  }, [resetStepState, stop]);
+  }, [clearInteractionTimers, resetStepState, stop]);
 
   const playRemoval = useCallback(() => {
-    if (removeTimer.current) clearTimeout(removeTimer.current);
-    if (representTimer.current) clearTimeout(representTimer.current);
+    clearInteractionTimers();
     setRepFilled({});
     setRepFeedback(null);
     setHintVisible(false);
@@ -131,11 +141,11 @@ export function GameScreen() {
     setAnimationKey((k) => k + 1);
     setPhase("observe");
     // pequeno respiro antes da saída dos animais
-    removeTimer.current = setTimeout(() => {
+    schedule(() => {
       setPhase("removing");
-      removeTimer.current = setTimeout(() => setPhase("question"), 2500);
+      schedule(() => setPhase("question"), 2500);
     }, 120);
-  }, []);
+  }, [clearInteractionTimers, schedule]);
 
   const answer = useCallback(
     (value: number) => {
@@ -144,16 +154,15 @@ export function GameScreen() {
       setSelectedAnswer(value);
       setHintVisible(false);
       if (value === c.answer) {
+        // O feedback de acerto permanece na tela: a criança decide quando seguir.
+        clearInteractionTimers();
         setPhase("solved");
-        if (representTimer.current) clearTimeout(representTimer.current);
-        // transição suave: feedback de acerto → área da operação
-        representTimer.current = setTimeout(() => setPhase("represent"), 450);
       } else {
         setAttempts((a) => a + 1);
         setAttemptsByQuestion((prev) => ({ ...prev, [c.id]: (prev[c.id] ?? 0) + 1 }));
       }
     },
-    [phase, step],
+    [clearInteractionTimers, phase, step],
   );
 
   /** Clique em um número da microetapa: preenche a lacuna ativa ou orienta sem penalizar. */
