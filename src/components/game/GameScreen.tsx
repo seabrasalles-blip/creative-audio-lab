@@ -486,7 +486,7 @@ export function GameScreen() {
 
 
       {/* BALÃO DE FALA — sempre à direita da área ocupada pela Mara */}
-      {currentSpeech && step.kind !== "meta" && (
+      {currentSpeech && step.kind !== "meta" && representLayout !== "tens" && (
         <div
           className="absolute"
           style={{
