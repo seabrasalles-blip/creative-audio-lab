@@ -463,7 +463,7 @@ export function GameScreen() {
       )}
 
       {/* MARA — área protegida no canto inferior esquerdo */}
-      {step.kind !== "cover" && step.kind !== "meta" && (
+      {step.kind !== "cover" && step.kind !== "meta" && representLayout !== "tens" && (
         <div
           ref={maraRef}
           className="absolute left-6"
