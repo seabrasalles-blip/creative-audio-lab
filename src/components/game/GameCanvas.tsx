@@ -10,10 +10,13 @@ export function GameCanvas({
   background: BackgroundKey;
   children: ReactNode;
 }) {
-  const { scale, width, height } = useCanvasScale();
+  const { scale, width, height, containerRef } = useCanvasScale();
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-[var(--deep-sea)]">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 flex items-center justify-center overflow-hidden bg-[var(--deep-sea)]"
+    >
       <div
         style={{ width, height, transform: `scale(${scale})` }}
         className="relative origin-center overflow-hidden"
