@@ -619,18 +619,57 @@ export function GameScreen() {
 
 
       {/* ZONA C — REPRESENTAÇÃO SIMBÓLICA (composição própria da fase) */}
-      {step.kind === "challenge" && phase === "represent" && representation && (
+      {step.kind === "challenge" && phase === "represent" && representation && representLayout === "tens" && (
+        /**
+         * Faixa inferior única: [MARA] gap [BALÃO + ÁUDIO] gap [OPERAÇÃO].
+         * Os três blocos vivem no mesmo sistema de layout (flex + gap),
+         * sem coordenadas absolutas independentes, o que mantém as áreas
+         * protegidas mesmo quando o canvas é escalado em iframe/Portal.
+         */
+        <div
+          className="absolute inset-x-0 bottom-0 flex items-end gap-6 px-6 pb-2"
+          style={{ zIndex: 40, height: 250 }}
+        >
+          <div className="shrink-0 self-end">
+            <Character pose={pose} height={210} />
+          </div>
+
+          {currentSpeech && (
+            <div className="min-w-0 flex-1 pb-4">
+              <SpeechBubble
+                text={currentSpeech.text}
+                speaking={speaking}
+                finished={finished}
+                onPlay={() => {
+                  if (speaking) {
+                    stop();
+                    return;
+                  }
+                  speak(currentSpeech);
+                }}
+              />
+            </div>
+          )}
+
+          <div className="flex shrink-0 justify-center pb-4" style={{ width: 470 }}>
+            <OperationBuilder
+              representation={representation}
+              choices={repChoices}
+              filled={repFilled}
+              activeBlank={activeBlank}
+              onChoose={chooseNumber}
+              compact
+            />
+          </div>
+        </div>
+      )}
+
+      {step.kind === "challenge" && phase === "represent" && representation && representLayout !== "tens" && (
         <div
           className="absolute flex justify-center"
-          style={
-            representLayout === "tens"
-              ? { zIndex: 40, right: 16, bottom: 24, width: 440 }
-              : { zIndex: 40, left: 470, right: 20, bottom: 24 }
-
-          }
+          style={{ zIndex: 40, left: 470, right: 20, bottom: 24 }}
         >
           <div className="flex w-full justify-center">
-
             <OperationBuilder
               representation={representation}
               choices={repChoices}
@@ -642,6 +681,7 @@ export function GameScreen() {
           </div>
         </div>
       )}
+
 
       {/* ZONA D — NAVEGAÇÃO PRÓPRIA DA MICROETAPA "REPRESENT" (fora da zona da operação) */}
       {step.kind === "challenge" && phase === "represent" && repDone && (
