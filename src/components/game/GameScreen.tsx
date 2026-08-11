@@ -745,7 +745,7 @@ export function GameScreen() {
           <div className="flex shrink-0 justify-center pb-4" style={{ width: 470 }}>
             <OperationBuilder
               representation={representation}
-              choices={repChoices}
+              choices={availableRepChoices}
               filled={repFilled}
               activeBlank={activeBlank}
               onChoose={chooseNumber}
