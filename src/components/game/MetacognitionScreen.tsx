@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AssetButton } from "@/components/game/AssetButton";
 import { Character } from "@/components/game/Character";
