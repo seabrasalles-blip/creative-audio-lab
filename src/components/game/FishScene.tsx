@@ -11,19 +11,19 @@ type SceneProps = {
   phase: Phase;
   animationKey: number;
   highlightRemaining?: boolean;
-  /** Composição condensada usada quando há dezenas (cardumes + unidades). */
+  /** Composição condensada usada quando há dezenas (grupos de 10 + unidades). */
   compact?: boolean;
 };
 
 const FISH_WIDTH = 74;
 
-/** Cardumes grandes o bastante para a criança reconhecer os 10 peixes. */
+/** Grupos de 10 grandes o bastante para a criança reconhecer os 10 peixes. */
 function groupWidth(tens: number) {
   return tens >= 4 ? 170 : 190;
 }
 
 /**
- * Cena matemática: cardumes (dezenas) e peixes individuais (unidades).
+ * Cena matemática: grupos de 10 (dezenas) e peixes individuais (unidades).
  * Somente os assets fornecidos são usados.
  */
 export function FishScene({
@@ -65,7 +65,7 @@ export function FishScene({
                 <motion.img
                   key={g.id}
                   src={animals.fishGroup10}
-                  alt="Cardume organizado com 10 peixes"
+                  alt="Grupo de 10 peixes"
                   style={{ width: GROUP_WIDTH }}
                   className="h-auto object-contain"
                   initial={false}

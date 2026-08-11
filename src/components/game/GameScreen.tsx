@@ -652,7 +652,7 @@ export function GameScreen() {
         )}
       </div>
 
-      {/* CONTINUAÇÃO APÓS O ACERTO — zona própria nas telas com cardumes */}
+      {/* CONTINUAÇÃO APÓS O ACERTO — zona própria nas telas com grupos de 10 */}
       {step.kind === "challenge" && phase === "solved" && hasTens && (
         <div className="absolute animate-scale-in" style={{ zIndex: 50, right: 24, bottom: 152 }}>
           <button
