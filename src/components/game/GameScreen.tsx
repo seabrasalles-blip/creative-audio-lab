@@ -617,14 +617,15 @@ export function GameScreen() {
           </button>
         )}
 
-        {step.kind === "challenge" && phase === "observe" && (
-          <AssetButton
-            asset="next"
-            width={190}
-            label="Ver o que aconteceu no recife"
-            onClick={playRemoval}
-          />
-        )}
+        {step.kind === "challenge" &&
+          (phase === "observe" || (phase === "initial-count" && countDone)) && (
+            <AssetButton
+              asset="next"
+              width={190}
+              label="Ver o que acontece no recife"
+              onClick={playRemoval}
+            />
+          )}
 
         {step.kind === "challenge" && (phase === "question" || phase === "removing") && (
           <button
