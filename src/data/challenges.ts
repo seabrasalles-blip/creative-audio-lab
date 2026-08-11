@@ -19,6 +19,8 @@ type Seed = {
   /** observação ativa: a criança responde quantos há antes da retirada */
   initialCountCheck?: boolean;
   initialCountQuestion?: string;
+  /** fala mediadora da Mara na microfase (nunca repete a pergunta) */
+  initialCountMara?: string;
   initialCountOptions?: number[];
   initialCountCorrect?: string;
   initialCountRetry?: string;
@@ -52,9 +54,10 @@ const seeds: Seed[] = [
     errors: ["Observe novamente. Conte os peixes que ficaram."],
     initialCountCheck: true,
     initialCountQuestion: "Quantos peixes há no recife?",
+    initialCountMara: "Conte com calma e escolha o número.",
     initialCountOptions: [4, 5, 6],
-    initialCountCorrect: "Isso! Há 5 peixes. Agora veja o que acontece.",
-    initialCountRetry: "Conte novamente os peixes.",
+    initialCountCorrect: "Isso! Há 5 peixes.",
+    initialCountRetry: "Conte novamente, começando pelo primeiro peixe.",
   },
   {
     id: "c2",
@@ -70,9 +73,10 @@ const seeds: Seed[] = [
     errors: ["Quase! Conte apenas os peixes que permaneceram no recife."],
     initialCountCheck: true,
     initialCountQuestion: "Quantos peixes há no recife?",
+    initialCountMara: "Olhe para todos os peixes antes de escolher.",
     initialCountOptions: [5, 6, 7],
-    initialCountCorrect: "Isso! Há 6 peixes. Agora veja o que acontece.",
-    initialCountRetry: "Conte novamente os peixes.",
+    initialCountCorrect: "Isso! Há 6 peixes.",
+    initialCountRetry: "Conte novamente, começando pelo primeiro peixe.",
   },
   {
     id: "c3",
@@ -88,9 +92,10 @@ const seeds: Seed[] = [
     errors: ["Observe novamente os peixes que ficaram no recife."],
     initialCountCheck: true,
     initialCountQuestion: "Quantos peixes há no começo?",
+    initialCountMara: "Conte um por um e escolha o número.",
     initialCountOptions: [7, 8, 9],
-    initialCountCorrect: "Isso! Há 8 peixes. Agora veja o que acontece.",
-    initialCountRetry: "Conte novamente os peixes.",
+    initialCountCorrect: "Isso! Há 8 peixes.",
+    initialCountRetry: "Conte novamente, começando pelo primeiro peixe.",
   },
   {
     id: "c4",
@@ -119,9 +124,10 @@ const seeds: Seed[] = [
     errors: ["Observe novamente. Comece pelo grupo de 10."],
     initialCountCheck: true,
     initialCountQuestion: "Quantos peixes há ao todo?",
+    initialCountMara: "Comece pelo grupo de 10 e conte também os peixes separados.",
     initialCountOptions: [10, 12, 20],
-    initialCountCorrect: "Isso! Ao todo são 12 peixes. Agora veja o que acontece.",
-    initialCountRetry: "Comece pelo grupo de 10 e depois conte os peixes separados.",
+    initialCountCorrect: "Isso! Ao todo são 12 peixes.",
+    initialCountRetry: "Comece pelo grupo de 10 e depois conte os separados.",
   },
   {
     id: "c6",
@@ -150,9 +156,10 @@ const seeds: Seed[] = [
     errors: ["Observe novamente os peixes separados que ficaram."],
     initialCountCheck: true,
     initialCountQuestion: "Quantos peixes há ao todo?",
+    initialCountMara: "Use o grupo de 10 para ajudar na contagem.",
     initialCountOptions: [10, 16, 6],
-    initialCountCorrect: "Isso! Ao todo são 16 peixes. Agora veja o que acontece.",
-    initialCountRetry: "Comece pelo grupo de 10 e depois conte os peixes separados.",
+    initialCountCorrect: "Isso! Ao todo são 16 peixes.",
+    initialCountRetry: "Comece pelo grupo de 10 e depois conte os separados.",
   },
   {
     id: "c8",
@@ -176,7 +183,7 @@ const seeds: Seed[] = [
     removeOnes: 0,
     options: [10, 11, 20],
     hint: "Veja quantos grupos de 10 continuam no recife.",
-    observe: "Observe quantos peixes há antes de começarmos.",
+    observe: "Veja quantos grupos de 10 estão no recife.",
     abertura: "Isso mesmo!",
     errors: ["Observe novamente. Quantos grupos de 10 ainda estão no recife?"],
   },
@@ -189,7 +196,7 @@ const seeds: Seed[] = [
     removeOnes: 2,
     options: [11, 12, 14],
     hint: "Conte os grupos de 10 que ficaram e depois os peixes separados.",
-    observe: "Observe quantos peixes há antes de começarmos.",
+    observe: "Compare os grupos de 10 com os peixes separados.",
     abertura: "Exato!",
     errors: ["Quase! Some os grupos de 10 que ficaram com os peixes separados."],
   },
@@ -202,7 +209,7 @@ const seeds: Seed[] = [
     removeOnes: 3,
     options: [12, 13, 22],
     hint: "Cada grupo de 10 que ficou tem 10 peixes.",
-    observe: "Observe quantos peixes há antes de começarmos.",
+    observe: "Conte primeiro os grupos de 10, depois os separados.",
     abertura: "Muito bem!",
     errors: ["Observe novamente. Conte os grupos de 10 que permaneceram."],
   },
@@ -419,6 +426,7 @@ export const challenges: Challenge[] = seeds.map((s) => {
     initialCount: hasInitialCount
       ? {
           question: { key: `${s.id}-count`, text: s.initialCountQuestion! },
+          mediation: { key: `${s.id}-count-mara`, text: s.initialCountMara! },
           options: s.initialCountOptions!,
           answer: total,
           correct: { key: `${s.id}-count-correct`, text: s.initialCountCorrect! },

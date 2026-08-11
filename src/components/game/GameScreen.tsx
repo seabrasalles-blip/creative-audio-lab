@@ -133,7 +133,7 @@ export function GameScreen() {
         if (phase === "initial-count" && c.initialCount) {
           if (countDone) return c.initialCount.correct;
           if (countWrong) return c.initialCount.retry;
-          return c.initialCount.question;
+          return c.initialCount.mediation;
         }
         if (phase === "represent") {
           if (repFeedback) return repFeedback;
@@ -408,7 +408,9 @@ export function GameScreen() {
               style={{ lineHeight: 1.35 }}
             >
               {phase === "initial-count" && step.challenge.initialCount
-                ? step.challenge.initialCount.question.text
+                ? countDone
+                  ? "Veja o que acontece."
+                  : step.challenge.initialCount.question.text
                 : phase === "observe"
                   ? step.challenge.tens > 0
                     ? "Observe os grupos de 10 e os peixes que estão separados."
