@@ -2,14 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AssetButton } from "@/components/game/AssetButton";
 import { Character } from "@/components/game/Character";
+import { FishScene } from "@/components/game/FishScene";
 import type { MetaQuestion, Speech } from "@/types/game";
 
 /** Posição da alternativa correta em cada questão (0-based), balanceada. */
 const correctPosition: Record<string, number> = {
-  m1: 1,
-  m2: 2,
-  "m-rep": 0,
-  m3: 2,
+  "meta-op": 1,
+  "meta-role": 2,
 };
 
 /**
@@ -75,8 +74,41 @@ export function MetacognitionScreen({
   const bubbleLeft = MARA_LEFT + maraWidth + MARA_GAP;
   const bubbleWidth = Math.max(320, LEFT_ZONE_RIGHT - bubbleLeft);
 
+  /**
+   * Situação concreta: a cena permanece visível ao lado da pergunta.
+   * A retirada é mostrada uma vez, e o estado final continua na tela.
+   */
+  const [scenePhase, setScenePhase] = useState<"observe" | "solved">("observe");
+  useEffect(() => {
+    if (!meta.scene) return;
+    setScenePhase("observe");
+    const t = setTimeout(() => setScenePhase("solved"), 1200);
+    return () => clearTimeout(t);
+  }, [meta.id, meta.scene]);
+
   return (
     <>
+      {/* ZONA ESQUERDA — situação concreta (faixa superior, acima do balão) */}
+      {meta.scene && (
+        <div
+          className="absolute"
+          style={{ zIndex: 10, left: MARA_LEFT, top: 18, width: LEFT_ZONE_RIGHT - MARA_LEFT }}
+        >
+          <div style={{ transform: "scale(0.78)", transformOrigin: "left top" }}>
+            <FishScene
+              tens={meta.scene.tens}
+              ones={meta.scene.ones}
+              removeTens={meta.scene.removeTens}
+              removeOnes={meta.scene.removeOnes}
+              phase={scenePhase}
+              animationKey={0}
+              highlightRemaining={scenePhase === "solved"}
+              compact
+            />
+          </div>
+        </div>
+      )}
+
       {/* ZONA ESQUERDA — balão com a pergunta (é o próprio enunciado) */}
       <div className="absolute" style={{ zIndex: 30, left: bubbleLeft, top: 170, width: bubbleWidth }}>
         <div className="relative rounded-[28px] border-4 border-[var(--navy)] bg-[var(--cream)] px-7 py-5 shadow-[0_4px_0_rgba(12,42,74,0.18)]">

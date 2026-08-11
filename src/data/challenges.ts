@@ -1,5 +1,5 @@
-import { ficou, havia, retomada, saiu } from "@/lib/pt";
-import type { Challenge, RepRole } from "@/types/game";
+import { ficou, havia, retomada, saiu, saiuPosposto } from "@/lib/pt";
+import type { Challenge, RepChoice, RepRole } from "@/types/game";
 
 type Seed = {
   id: string;
@@ -16,6 +16,12 @@ type Seed = {
   /** abertura do feedback de acerto (a retomada numérica é gerada) */
   abertura: string;
   errors: string[];
+  /** observação ativa: a criança responde quantos há antes da retirada */
+  initialCountCheck?: boolean;
+  initialCountQuestion?: string;
+  initialCountOptions?: number[];
+  initialCountCorrect?: string;
+  initialCountRetry?: string;
 };
 
 const seeds: Seed[] = [
@@ -44,6 +50,11 @@ const seeds: Seed[] = [
     observe: "Conte com calma antes de continuar.",
     abertura: "Muito bem!",
     errors: ["Observe novamente. Conte os peixes que ficaram."],
+    initialCountCheck: true,
+    initialCountQuestion: "Quantos peixes há no recife?",
+    initialCountOptions: [4, 5, 6],
+    initialCountCorrect: "Isso! Há 5 peixes. Agora veja o que acontece.",
+    initialCountRetry: "Conte novamente os peixes.",
   },
   {
     id: "c2",
@@ -57,6 +68,11 @@ const seeds: Seed[] = [
     observe: "Quantos peixes você consegue contar?",
     abertura: "Isso!",
     errors: ["Quase! Conte apenas os peixes que permaneceram no recife."],
+    initialCountCheck: true,
+    initialCountQuestion: "Quantos peixes há no recife?",
+    initialCountOptions: [5, 6, 7],
+    initialCountCorrect: "Isso! Há 6 peixes. Agora veja o que acontece.",
+    initialCountRetry: "Conte novamente os peixes.",
   },
   {
     id: "c3",
@@ -70,6 +86,11 @@ const seeds: Seed[] = [
     observe: "Olhe com atenção para o recife.",
     abertura: "Exato!",
     errors: ["Observe novamente os peixes que ficaram no recife."],
+    initialCountCheck: true,
+    initialCountQuestion: "Quantos peixes há no começo?",
+    initialCountOptions: [7, 8, 9],
+    initialCountCorrect: "Isso! Há 8 peixes. Agora veja o que acontece.",
+    initialCountRetry: "Conte novamente os peixes.",
   },
   {
     id: "c4",
@@ -92,10 +113,15 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 2,
     options: [10, 11, 12],
-    hint: "Cada cardume vale 10. Conte o cardume e junte os peixes separados.",
-    observe: "Comece pelos cardumes e depois olhe os peixes separados.",
+    hint: "Conte o grupo de 10 e junte os peixes separados.",
+    observe: "Comece pelo grupo de 10 e depois olhe os peixes separados.",
     abertura: "Muito bem!",
-    errors: ["Observe novamente. Comece pelo cardume."],
+    errors: ["Observe novamente. Comece pelo grupo de 10."],
+    initialCountCheck: true,
+    initialCountQuestion: "Quantos peixes há ao todo?",
+    initialCountOptions: [10, 12, 20],
+    initialCountCorrect: "Isso! Ao todo são 12 peixes. Agora veja o que acontece.",
+    initialCountRetry: "Comece pelo grupo de 10 e depois conte os peixes separados.",
   },
   {
     id: "c6",
@@ -105,8 +131,8 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 3,
     options: [10, 11, 12],
-    hint: "Conte o cardume como 10 e junte os peixes que ficaram.",
-    observe: "Olhe primeiro o cardume. Depois os peixes separados.",
+    hint: "Conte o grupo de 10 e junte os peixes que ficaram.",
+    observe: "Olhe primeiro o grupo de 10. Depois os peixes separados.",
     abertura: "Isso!",
     errors: ["Quase! Veja quais peixes separados ainda estão no recife."],
   },
@@ -118,10 +144,15 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 4,
     options: [11, 12, 13],
-    hint: "Comece pelo cardume e depois conte os peixes separados.",
+    hint: "Comece pelo grupo de 10 e depois conte os peixes separados.",
     observe: "Observe o recife com calma.",
     abertura: "Exato!",
     errors: ["Observe novamente os peixes separados que ficaram."],
+    initialCountCheck: true,
+    initialCountQuestion: "Quantos peixes há ao todo?",
+    initialCountOptions: [10, 16, 6],
+    initialCountCorrect: "Isso! Ao todo são 16 peixes. Agora veja o que acontece.",
+    initialCountRetry: "Comece pelo grupo de 10 e depois conte os peixes separados.",
   },
   {
     id: "c8",
@@ -131,10 +162,10 @@ const seeds: Seed[] = [
     removeTens: 0,
     removeOnes: 5,
     options: [12, 13, 14],
-    hint: "O cardume continua inteiro. Conte só os peixes separados.",
-    observe: "Comece pelos cardumes. Depois conte os peixes separados.",
+    hint: "O grupo de 10 continua inteiro. Conte só os peixes separados.",
+    observe: "Comece pelo grupo de 10. Depois conte os peixes separados.",
     abertura: "Muito bem!",
-    errors: ["Quase! Conte o cardume e junte os peixes que ficaram."],
+    errors: ["Quase! Conte o grupo de 10 e junte os peixes que ficaram."],
   },
   {
     id: "c9",
@@ -144,10 +175,10 @@ const seeds: Seed[] = [
     removeTens: 1,
     removeOnes: 0,
     options: [10, 11, 20],
-    hint: "Veja quantos cardumes continuam no recife.",
-    observe: "Olhe com atenção para os cardumes.",
+    hint: "Veja quantos grupos de 10 continuam no recife.",
+    observe: "Observe quantos peixes há antes de começarmos.",
     abertura: "Isso mesmo!",
-    errors: ["Observe novamente. Quantos cardumes ainda estão no recife?"],
+    errors: ["Observe novamente. Quantos grupos de 10 ainda estão no recife?"],
   },
   {
     id: "c10",
@@ -157,10 +188,10 @@ const seeds: Seed[] = [
     removeTens: 1,
     removeOnes: 2,
     options: [11, 12, 14],
-    hint: "Conte os cardumes que ficaram e depois os peixes separados.",
-    observe: "Comece pelos cardumes.",
+    hint: "Conte os grupos de 10 que ficaram e depois os peixes separados.",
+    observe: "Observe quantos peixes há antes de começarmos.",
     abertura: "Exato!",
-    errors: ["Quase! Some os cardumes que ficaram com os peixes separados."],
+    errors: ["Quase! Some os grupos de 10 que ficaram com os peixes separados."],
   },
   {
     id: "c11",
@@ -170,10 +201,10 @@ const seeds: Seed[] = [
     removeTens: 2,
     removeOnes: 3,
     options: [12, 13, 22],
-    hint: "Cada cardume que ficou vale 10 peixes.",
-    observe: "Olhe primeiro os cardumes. Depois os peixes separados.",
+    hint: "Cada grupo de 10 que ficou tem 10 peixes.",
+    observe: "Observe quantos peixes há antes de começarmos.",
     abertura: "Muito bem!",
-    errors: ["Observe novamente. Conte os cardumes que permaneceram."],
+    errors: ["Observe novamente. Conte os grupos de 10 que permaneceram."],
   },
   {
     id: "c12",
@@ -183,10 +214,10 @@ const seeds: Seed[] = [
     removeTens: 2,
     removeOnes: 4,
     options: [20, 22, 24],
-    hint: "Conte os cardumes que ficaram e depois os peixes que ficaram.",
-    observe: "Conte com calma: primeiro os cardumes, depois os peixes.",
+    hint: "Conte os grupos de 10 que ficaram e depois os peixes que ficaram.",
+    observe: "Conte com calma: primeiro os grupos de 10, depois os peixes.",
     abertura: "Isso mesmo!",
-    errors: ["Quase! Quantos cardumes ainda estão no recife?"],
+    errors: ["Quase! Quantos grupos de 10 ainda estão no recife?"],
   },
 ];
 
@@ -197,7 +228,7 @@ const seeds: Seed[] = [
 type RepSeed = {
   level: 0 | 1 | 2 | 3;
   blanks: RepRole[];
-  choices: number[];
+  choices: RepChoice[];
   prompt: string;
   done: string;
 };
@@ -212,6 +243,7 @@ const repSeeds: Record<string, RepSeed> = {
     prompt: "Podemos mostrar com números: havia 3, saiu 1 e ficaram 2.",
     done: SINAL,
   },
+  // Desafio 1 — demonstração completa
   c1: {
     level: 0,
     blanks: [],
@@ -219,6 +251,7 @@ const repSeeds: Record<string, RepSeed> = {
     prompt: "Podemos mostrar com números: havia 5, saiu 1 e ficaram 4.",
     done: SINAL,
   },
+  // Desafio 2 — demonstração completa
   c2: {
     level: 0,
     blanks: [],
@@ -226,73 +259,116 @@ const repSeeds: Record<string, RepSeed> = {
     prompt: "Olhe: 6 mostra quantos havia, 2 mostra quantos saíram e 4 mostra quantos ficaram.",
     done: "Depois do sinal de igual mostramos quantos ficaram.",
   },
+  // Desafio 3 — uma lacuna (resultado)
   c3: {
     level: 1,
     blanks: ["result"],
-    choices: [4, 5, 6],
+    choices: [
+      { id: "c3-a", value: 4 },
+      { id: "c3-b", value: 5 },
+      { id: "c3-c", value: 6 },
+    ],
     prompt: "Qual número mostra quantos ficaram?",
     done: "Isso! O 5 mostra quantos ficaram.",
   },
   c4: {
     level: 1,
     blanks: ["initial"],
-    choices: [4, 5, 9],
+    choices: [
+      { id: "c4-a", value: 4 },
+      { id: "c4-b", value: 5 },
+      { id: "c4-c", value: 9 },
+    ],
     prompt: "Qual número mostra quantos havia no começo?",
     done: "Isso! 9 − 4 = 5.",
   },
+  // Desafio 4 — uma lacuna (quanto saiu)
   c5: {
     level: 1,
     blanks: ["removed"],
-    choices: [2, 10, 12],
+    choices: [
+      { id: "c5-a", value: 2 },
+      { id: "c5-b", value: 10 },
+      { id: "c5-c", value: 12 },
+    ],
     prompt: "Qual número mostra quantos saíram?",
     done: "Isso! 12 − 2 = 10.",
   },
   c6: {
     level: 1,
     blanks: ["initial"],
-    choices: [3, 11, 14],
+    choices: [
+      { id: "c6-a", value: 3 },
+      { id: "c6-b", value: 11 },
+      { id: "c6-c", value: 14 },
+    ],
     prompt: "Qual número mostra quantos havia?",
     done: "Isso! 14 − 3 = 11.",
   },
+  // Desafio 5 — duas lacunas
   c7: {
-    level: 1,
-    blanks: ["result"],
-    choices: [4, 12, 16],
-    prompt: "Qual número mostra quantos ficaram?",
-    done: "Isso! 16 − 4 = 12.",
+    level: 2,
+    blanks: ["removed", "result"],
+    choices: [
+      { id: "c7-removed", value: 4 },
+      { id: "c7-result", value: 12 },
+    ],
+    prompt: "Agora encontre os dois números que faltam.",
+    done: "Muito bem! 16 − 4 = 12.",
   },
   c8: {
     level: 2,
     blanks: ["removed", "result"],
-    choices: [5, 13],
+    choices: [
+      { id: "c8-removed", value: 5 },
+      { id: "c8-result", value: 13 },
+    ],
     prompt: "Agora encontre os dois números que faltam.",
     done: "Muito bem! 18 − 5 = 13.",
   },
+  // Desafio 6 — duas lacunas
   c9: {
     level: 2,
     blanks: ["initial", "result"],
-    choices: [21, 11],
+    choices: [
+      { id: "c9-initial", value: 21 },
+      { id: "c9-result", value: 11 },
+    ],
     prompt: "Qual era a quantidade inicial? E quanto ficou?",
     done: "Muito bem! 21 − 10 = 11.",
   },
+  // Desafio 7 — três lacunas (dois valores 12, com ids próprios)
   c10: {
-    level: 2,
-    blanks: ["initial", "removed"],
-    choices: [24, 12],
-    prompt: "Mostre quantos havia e quantos saíram.",
-    done: "Muito bem! 24 − 12 = 12.",
+    level: 3,
+    blanks: ["initial", "removed", "result"],
+    choices: [
+      { id: "c10-initial-24", value: 24 },
+      { id: "c10-removed-12", value: 12 },
+      { id: "c10-result-12", value: 12 },
+    ],
+    prompt: "Agora monte a operação que mostra o que aconteceu.",
+    done: "Você mostrou com números o que aconteceu no recife.",
   },
+  // Desafio 8 — três lacunas
   c11: {
     level: 3,
     blanks: ["initial", "removed", "result"],
-    choices: [35, 23, 12],
-    prompt: "Agora monte a operação que mostra o que aconteceu.",
+    choices: [
+      { id: "c11-initial", value: 35 },
+      { id: "c11-removed", value: 23 },
+      { id: "c11-result", value: 12 },
+    ],
+    prompt: "Mostre com números o que aconteceu no recife.",
     done: "Você mostrou com números o que aconteceu no recife.",
   },
   c12: {
     level: 3,
     blanks: ["initial", "removed", "result"],
-    choices: [46, 24, 22],
+    choices: [
+      { id: "c12-initial", value: 46 },
+      { id: "c12-removed", value: 24 },
+      { id: "c12-result", value: 22 },
+    ],
     prompt: "Mostre com números o que aconteceu no recife.",
     done: "Você mostrou com números o que aconteceu no recife.",
   },
@@ -304,6 +380,7 @@ export const challenges: Challenge[] = seeds.map((s) => {
   const result = total - removed;
   const restTens = s.tens - s.removeTens;
   const restOnes = s.ones - s.removeOnes;
+  const hasInitialCount = s.initialCountCheck === true;
   return {
     id: s.id,
     number: s.number,
@@ -311,8 +388,10 @@ export const challenges: Challenge[] = seeds.map((s) => {
     ones: s.ones,
     removeTens: s.removeTens,
     removeOnes: s.removeOnes,
-    prompt:
-      s.tens > 0
+    // Quando a criança já identificou a quantidade inicial, não repetimos esse número.
+    prompt: hasInitialCount
+      ? `${saiuPosposto(s.removeTens, s.removeOnes)}. Quantos ficaram?`
+      : s.tens > 0
         ? `${havia(s.tens, s.ones)}. ${saiu(s.removeTens, s.removeOnes)}. Quantos peixes ficaram?`
         : `${havia(0, s.ones)}. ${saiu(0, s.removeOnes)}. Quantos ficaram?`,
     options: s.options,
@@ -337,6 +416,15 @@ export const challenges: Challenge[] = seeds.map((s) => {
       prompt: { key: `${s.id}-rep`, text: repSeeds[s.id]!.prompt },
       done: { key: `${s.id}-rep-done`, text: repSeeds[s.id]!.done },
     },
+    initialCount: hasInitialCount
+      ? {
+          question: { key: `${s.id}-count`, text: s.initialCountQuestion! },
+          options: s.initialCountOptions!,
+          answer: total,
+          correct: { key: `${s.id}-count-correct`, text: s.initialCountCorrect! },
+          retry: { key: `${s.id}-count-retry`, text: s.initialCountRetry! },
+        }
+      : null,
   };
 });
 

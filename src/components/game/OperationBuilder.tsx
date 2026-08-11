@@ -1,13 +1,13 @@
 import { cn } from "@/lib/utils";
-import type { RepRole, Representation } from "@/types/game";
+import type { RepChoice, RepRole, Representation } from "@/types/game";
 
 type Props = {
   representation: Representation;
   /** ordem estável já embaralhada; cai para representation.choices se ausente */
-  choices?: number[];
+  choices?: RepChoice[];
   filled: Partial<Record<RepRole, number>>;
   activeBlank: RepRole | null;
-  onChoose: (value: number) => void;
+  onChoose: (choice: RepChoice) => void;
   compact?: boolean;
 };
 
@@ -86,10 +86,10 @@ export function OperationBuilder({
         <div className={cn("flex items-center justify-center", compact ? "gap-3" : "gap-4")}>
           {numbers.map((choice) => (
             <button
-              key={choice}
+              key={choice.id}
               type="button"
               onClick={() => onChoose(choice)}
-              aria-label={`Usar o número ${choice}`}
+              aria-label={`Usar o número ${choice.value}`}
               className={cn(
                 "cursor-pointer rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)]",
                 "font-display font-bold text-[var(--navy)] shadow-[0_3px_0_rgba(12,42,74,0.2)]",
@@ -103,7 +103,7 @@ export function OperationBuilder({
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              {choice}
+              {choice.value}
             </button>
           ))}
         </div>
