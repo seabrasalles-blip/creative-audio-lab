@@ -763,7 +763,7 @@ export function GameScreen() {
           <div className="flex w-full justify-center">
             <OperationBuilder
               representation={representation}
-              choices={repChoices}
+              choices={availableRepChoices}
               filled={repFilled}
               activeBlank={activeBlank}
               onChoose={chooseNumber}
