@@ -95,10 +95,13 @@ export function MetacognitionScreen({
           style={{ zIndex: 10, left: MARA_LEFT, top: 22, width: LEFT_ZONE_RIGHT - MARA_LEFT }}
         >
           <div
-            className="rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)]/85 px-5 py-3"
+            className="rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)]/85 px-4 py-2"
             style={{ maxWidth: LEFT_ZONE_RIGHT - MARA_LEFT }}
           >
-            <div style={{ transform: "scale(0.7)", transformOrigin: "center top", height: 92 }}>
+            <div
+              className="flex justify-center"
+              style={{ transform: "scale(0.7)", transformOrigin: "center top", height: 62 }}
+            >
               <FishScene
                 tens={meta.scene.tens}
                 ones={meta.scene.ones}
