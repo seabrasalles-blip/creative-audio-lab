@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AssetButton } from "@/components/game/AssetButton";
 import { Character } from "@/components/game/Character";
@@ -53,10 +53,32 @@ export function MetacognitionScreen({
     return out;
   }, [meta.id, meta.options]);
 
+  /**
+   * A largura real da Mara é medida em runtime: o balão só existe à direita
+   * da área ocupada pela personagem (nenhuma interseção geométrica).
+   */
+  const maraRef = useRef<HTMLDivElement>(null);
+  const [maraWidth, setMaraWidth] = useState(190);
+  useEffect(() => {
+    const el = maraRef.current;
+    if (!el) return;
+    const measure = () => setMaraWidth(el.offsetWidth || 190);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [answered]);
+
+  const MARA_LEFT = 28;
+  const MARA_GAP = 22;
+  const LEFT_ZONE_RIGHT = 640; // limite direito da zona esquerda (alternativas começam em 670)
+  const bubbleLeft = MARA_LEFT + maraWidth + MARA_GAP;
+  const bubbleWidth = Math.max(320, LEFT_ZONE_RIGHT - bubbleLeft);
+
   return (
     <>
       {/* ZONA ESQUERDA — balão com a pergunta (é o próprio enunciado) */}
-      <div className="absolute" style={{ zIndex: 30, left: 200, top: 175, width: 440 }}>
+      <div className="absolute" style={{ zIndex: 30, left: bubbleLeft, top: 170, width: bubbleWidth }}>
         <div className="relative rounded-[28px] border-4 border-[var(--navy)] bg-[var(--cream)] px-7 py-5 shadow-[0_4px_0_rgba(12,42,74,0.18)]">
           <p
             className="font-body text-[28px] font-medium text-[var(--navy)]"
@@ -87,9 +109,10 @@ export function MetacognitionScreen({
       </div>
 
       {/* ZONA ESQUERDA — Mara */}
-      <div className="absolute" style={{ zIndex: 20, left: 30, bottom: 15 }}>
-        <Character pose={answered ? "celebrating" : "thinking"} height={245} />
+      <div className="absolute" style={{ zIndex: 20, left: MARA_LEFT, bottom: 15 }} ref={maraRef}>
+        <Character pose={answered ? "celebrating" : "thinking"} height={240} />
       </div>
+
 
       {/* ZONA DIREITA — alternativas */}
       <div
