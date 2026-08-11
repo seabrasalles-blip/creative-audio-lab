@@ -5,66 +5,42 @@ const byId = (id: string) => challenges.find((c) => c.id === id)!;
 
 const metaQuestions: MetaQuestion[] = [
   {
-    id: "m1",
-    question: { key: "meta-1", text: "O que ajudou você a descobrir as respostas?" },
+    id: "meta-op",
+    question: {
+      key: "meta-op",
+      text: "Havia 8 peixes e 3 saíram. Qual operação mostra o que aconteceu?",
+    },
     options: [
-      { label: "Observar os cardumes e os peixes separados.", correct: true },
-      { label: "Escolher o maior número.", correct: false },
-      { label: "Contar apenas os que saíram.", correct: false },
+      { label: "8 − 3 = 5", correct: true },
+      { label: "8 + 3 = 11", correct: false },
+      { label: "5 − 3 = 2", correct: false },
     ],
     correct: {
-      key: "meta-1-correct",
-      text: "Sim! Olhar os cardumes e depois os peixes separados organiza a contagem.",
+      key: "meta-op-correct",
+      text: "Isso! 8 − 3 = 5 mostra quantos havia, quantos saíram e quantos ficaram.",
     },
     retry: {
-      key: "meta-1-retry",
-      text: "Pense no que você fez em cada desafio antes de responder.",
+      key: "meta-op-retry",
+      text: "Olhe a cena: comece pela quantidade que havia e veja quantos saíram.",
     },
+    scene: { tens: 0, ones: 8, removeTens: 0, removeOnes: 3 },
   },
   {
-    id: "m2",
-    question: { key: "meta-2", text: "O que um cardume organizado representa?" },
+    id: "meta-role",
+    question: { key: "meta-role", text: "Na operação 14 − 3 = 11, o que o número 3 mostra?" },
     options: [
-      { label: "10 peixes.", correct: true },
-      { label: "2 peixes.", correct: false },
-      { label: "1 peixe.", correct: false },
-    ],
-    correct: { key: "meta-2-correct", text: "Isso! Cada cardume organizado tem 10 peixes." },
-    retry: { key: "meta-2-retry", text: "Lembre-se do cardume que você viu se formar." },
-  },
-  {
-    id: "m-rep",
-    question: {
-      key: "meta-rep",
-      text: "Na operação 18 − 5 = 13, o que o número 5 mostra?",
-    },
-    options: [
-      { label: "Quantos saíram.", correct: true },
       { label: "Quantos havia.", correct: false },
+      { label: "Quantos saíram.", correct: true },
       { label: "Quantos ficaram.", correct: false },
     ],
     correct: {
-      key: "meta-rep-correct",
+      key: "meta-role-correct",
       text: "Isso! O número depois do sinal de menos mostra quantos saíram.",
     },
     retry: {
-      key: "meta-rep-retry",
-      text: "Veja: 18 mostra quantos havia e 13 mostra quantos ficaram.",
+      key: "meta-role-retry",
+      text: "Veja: 14 mostra quantos havia e 11 mostra quantos ficaram.",
     },
-  },
-  {
-    id: "m3",
-    question: { key: "meta-3", text: "O que fazemos em uma situação de retirada?" },
-    options: [
-      { label: "Descobrimos quanto restou.", correct: true },
-      { label: "Aumentamos a quantidade.", correct: false },
-      { label: "Juntamos dois grupos.", correct: false },
-    ],
-    correct: {
-      key: "meta-3-correct",
-      text: "Exato! Quando uma parte sai, descobrimos quanto ficou.",
-    },
-    retry: { key: "meta-3-retry", text: "Pense nos peixes que saíram e nos que ficaram." },
   },
 ];
 
@@ -80,11 +56,10 @@ export const flow: Step[] = [
       text: "Olá! Eu sou a Mara. Vamos observar o recife e descobrir quantos animais ficam quando alguns saem?",
     },
   },
-  { kind: "challenge", id: "tutorial", challenge: byId("tutorial") },
+  // MOMENTO 1 — retirada com pequenas quantidades
   { kind: "challenge", id: "c1", challenge: byId("c1") },
   { kind: "challenge", id: "c2", challenge: byId("c2") },
   { kind: "challenge", id: "c3", challenge: byId("c3") },
-  { kind: "challenge", id: "c4", challenge: byId("c4") },
   {
     kind: "transition",
     id: "t-ten",
@@ -93,13 +68,12 @@ export const flow: Step[] = [
     showTenGroup: true,
     speech: {
       key: "mara-transition-ten",
-      text: "Os peixes formaram cardumes! Cada cardume organizado tem 10 peixes.",
+      text: "Agora há mais peixes! Para facilitar a contagem, alguns se organizaram em grupos de 10. Este grupo tem 10 peixes.",
     },
   },
+  // MOMENTO 2 — grupos de 10 e números maiores
   { kind: "challenge", id: "c5", challenge: byId("c5") },
-  { kind: "challenge", id: "c6", challenge: byId("c6") },
   { kind: "challenge", id: "c7", challenge: byId("c7") },
-  { kind: "challenge", id: "c8", challenge: byId("c8") },
   {
     kind: "transition",
     id: "t-cave",
@@ -108,19 +82,19 @@ export const flow: Step[] = [
     demo: { tens: 2, ones: 3, removeTens: 1, removeOnes: 1 },
     speech: {
       key: "mara-transition-groups",
-      text: "Agora podem sair cardumes inteiros e também alguns peixes separados. Ficou 1 cardume e 2 peixes: 12.",
+      text: "Agora pode sair um grupo de 10 inteiro e também alguns peixes separados. Ficaram 1 grupo de 10 e 2 peixes: 12.",
     },
   },
+  // MOMENTO 3 — retirada de grupos de 10 e peixes separados
   { kind: "challenge", id: "c9", challenge: byId("c9") },
   { kind: "challenge", id: "c10", challenge: byId("c10") },
   { kind: "challenge", id: "c11", challenge: byId("c11") },
-  { kind: "challenge", id: "c12", challenge: byId("c12") },
   {
     kind: "summary",
     id: "summary",
     speech: {
       key: "mara-summary",
-      text: "A operação mostra com números o que aconteceu: 35 − 23 = 12.",
+      text: "Primeiro observamos quantos peixes havia. Depois vimos quantos saíram. Por fim descobrimos quantos ficaram.",
     },
   },
   ...metaQuestions.map((meta) => ({ kind: "meta" as const, id: meta.id, meta })),
@@ -133,3 +107,10 @@ export const flow: Step[] = [
     },
   },
 ];
+
+/** Desafios ativos no percurso (fonte única do indicador de progresso). */
+export const activeChallengeIds = flow
+  .filter((step) => step.kind === "challenge")
+  .map((step) => step.id);
+
+export const totalChallenges = activeChallengeIds.length;

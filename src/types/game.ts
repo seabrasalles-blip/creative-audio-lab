@@ -9,6 +9,13 @@ export type Speech = {
 
 export type RepRole = "initial" | "removed" | "result";
 
+/**
+ * Opção numérica da representação simbólica.
+ * O id é semântico e único: 24 − 12 = 12 tem dois valores iguais, e cada card
+ * precisa de identidade própria para não se perder por chave duplicada.
+ */
+export type RepChoice = { id: string; value: number };
+
 /** Microetapa de representação simbólica após o acerto (andaimagem progressiva). */
 export type Representation = {
   /** 0 = demonstração, 1 = uma lacuna, 2 = duas lacunas, 3 = três lacunas */
@@ -19,9 +26,18 @@ export type Representation = {
   /** lacunas na ordem inicial → retirada → restante */
   blanks: RepRole[];
   /** números disponíveis para clique */
-  choices: number[];
+  choices: RepChoice[];
   prompt: Speech;
   done: Speech;
+};
+
+/** Observação ativa: a criança identifica a quantidade inicial antes da retirada. */
+export type InitialCount = {
+  question: Speech;
+  options: number[];
+  answer: number;
+  correct: Speech;
+  retry: Speech;
 };
 
 export type Challenge = {
@@ -40,6 +56,8 @@ export type Challenge = {
   correct: Speech;
   errors: Speech[];
   representation: Representation;
+  /** presente apenas nos desafios com observação ativa (andaimagem inicial) */
+  initialCount: InitialCount | null;
 };
 
 export type MetaQuestion = {
@@ -48,6 +66,8 @@ export type MetaQuestion = {
   options: { label: string; correct: boolean }[];
   correct: Speech;
   retry: Speech;
+  /** situação concreta que permanece visível ao lado da pergunta */
+  scene?: { tens: number; ones: number; removeTens: number; removeOnes: number };
 };
 
 export type Step =
@@ -67,4 +87,4 @@ export type Step =
   | { kind: "meta"; id: string; meta: MetaQuestion }
   | { kind: "final"; id: string; speech: Speech };
 
-export type Phase = "observe" | "removing" | "question" | "solved" | "represent";
+export type Phase = "observe" | "initial-count" | "removing" | "question" | "solved" | "represent";

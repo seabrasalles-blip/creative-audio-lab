@@ -11,15 +11,14 @@ import { ProgressIndicator } from "@/components/game/ProgressIndicator";
 import { SceneDecor } from "@/components/game/SceneDecor";
 import { SpeechBubble } from "@/components/game/SpeechBubble";
 import { preloadList, type BackgroundKey, type MaraPose } from "@/data/assets";
-import { scoredChallenges } from "@/data/challenges";
-import { flow } from "@/data/flow";
+import { activeChallengeIds, flow, totalChallenges } from "@/data/flow";
 import { OrientationGuard } from "@/components/game/OrientationGuard";
 import { stableShuffle } from "@/lib/shuffle";
 import { useAssetPreload } from "@/hooks/useAssetPreload";
 import { useMaraVoice } from "@/hooks/useMaraVoice";
-import type { Phase, RepRole, Speech } from "@/types/game";
+import type { Phase, RepChoice, RepRole, Speech } from "@/types/game";
 
-const TOTAL_CHALLENGES = scoredChallenges.length;
+const TOTAL_CHALLENGES = totalChallenges;
 
 export function GameScreen() {
   const ready = useAssetPreload(preloadList);
@@ -35,7 +34,12 @@ export function GameScreen() {
   const [metaAnswered, setMetaAnswered] = useState(false);
   const [metaWrong, setMetaWrong] = useState(false);
   const [repFilled, setRepFilled] = useState<Partial<Record<RepRole, number>>>({});
+  const [repUsed, setRepUsed] = useState<string[]>([]);
   const [repFeedback, setRepFeedback] = useState<Speech | null>(null);
+  /** Observação ativa (contagem inicial): não pontua e não penaliza. */
+  const [countSelected, setCountSelected] = useState<number | null>(null);
+  const [countDone, setCountDone] = useState(false);
+  const [countWrong, setCountWrong] = useState(false);
 
   const step = flow[stepIndex]!;
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -61,17 +65,25 @@ export function GameScreen() {
   /**
    * Ordem das opções numéricas embaralhada uma única vez por desafio:
    * a posição não pode entregar a resposta, e não muda após um erro.
+   * Cada card tem id próprio: 24 − 12 = 12 usa dois cards com o mesmo valor.
    */
   const repChoices = useMemo(() => {
-    if (!representation) return [];
+    if (!representation) return [] as RepChoice[];
     const original = representation.choices;
     if (original.length < 2) return original;
-    const shuffled = stableShuffle(original, `${step.id}-${original.join("-")}`);
+    const seed = original.map((c) => c.value).join("-");
+    const shuffled = stableShuffle(original, `${step.id}-${seed}`);
     // nunca manter a mesma ordem das lacunas: a posição não pode entregar a resposta
-    return shuffled.every((v, i) => v === original[i])
+    return shuffled.every((c, i) => c.id === original[i]?.id)
       ? [...shuffled.slice(1), shuffled[0]!]
       : shuffled;
   }, [representation, step.id]);
+
+  /** Cards ainda disponíveis (um card usado não pode preencher outra lacuna). */
+  const availableRepChoices = useMemo(
+    () => repChoices.filter((c) => !repUsed.includes(c.id)),
+    [repChoices, repUsed],
+  );
 
   const resetStepState = useCallback(() => {
     clearInteractionTimers();
@@ -82,11 +94,25 @@ export function GameScreen() {
     setMetaAnswered(false);
     setMetaWrong(false);
     setRepFilled({});
+    setRepUsed([]);
     setRepFeedback(null);
+    setCountSelected(null);
+    setCountDone(false);
+    setCountWrong(false);
     setAnimationKey((k) => k + 1);
   }, [clearInteractionTimers]);
 
   useEffect(() => () => clearInteractionTimers(), [clearInteractionTimers]);
+
+  /**
+   * Observação ativa: nos desafios configurados nos dados, a fase inicial é a
+   * identificação da quantidade inicial (sem tela nova e sem pontuação extra).
+   */
+  useEffect(() => {
+    const s = flow[stepIndex]!;
+    if (s.kind === "challenge" && s.challenge.initialCount) setPhase("initial-count");
+  }, [stepIndex]);
+
 
   /** Fala atual: sempre visível em texto e sempre reproduzível em áudio. */
   const currentSpeech: Speech | null = useMemo(() => {
@@ -104,6 +130,11 @@ export function GameScreen() {
         return step.meta.question;
       case "challenge": {
         const c = step.challenge;
+        if (phase === "initial-count" && c.initialCount) {
+          if (countDone) return c.initialCount.correct;
+          if (countWrong) return c.initialCount.retry;
+          return c.initialCount.question;
+        }
         if (phase === "represent") {
           if (repFeedback) return repFeedback;
           if (repDone) return c.representation.done;
@@ -122,7 +153,19 @@ export function GameScreen() {
         return c.observe;
       }
     }
-  }, [attempts, hintVisible, metaAnswered, metaWrong, phase, repDone, repFeedback, repFilled, step]);
+  }, [
+    attempts,
+    countDone,
+    countWrong,
+    hintVisible,
+    metaAnswered,
+    metaWrong,
+    phase,
+    repDone,
+    repFeedback,
+    repFilled,
+    step,
+  ]);
 
   // Troca de tela/fala interrompe imediatamente o áudio anterior.
   // Nunca há reprodução automática: o áudio só começa por clique do estudante.
@@ -187,13 +230,33 @@ export function GameScreen() {
     [clearInteractionTimers, phase, step],
   );
 
+  /**
+   * Contagem inicial: apoio pedagógico, nunca pontuação.
+   * O erro não penaliza e não entra nas tentativas da subtração.
+   */
+  const answerInitialCount = useCallback(
+    (value: number) => {
+      if (step.kind !== "challenge" || !step.challenge.initialCount || countDone) return;
+      setCountSelected(value);
+      if (value === step.challenge.initialCount.answer) {
+        setCountWrong(false);
+        setCountDone(true);
+      } else {
+        setCountWrong(true);
+      }
+    },
+    [countDone, step],
+  );
+
   /** Clique em um número da microetapa: preenche a lacuna ativa ou orienta sem penalizar. */
   const chooseNumber = useCallback(
-    (value: number) => {
+    (choice: RepChoice) => {
       if (!representation || !activeBlank) return;
+      const value = choice.value;
       if (value === representation[activeBlank]) {
         setRepFeedback(null);
         setRepFilled((prev) => ({ ...prev, [activeBlank]: value }));
+        setRepUsed((prev) => [...prev, choice.id]);
         return;
       }
       const roleOfValue = (["initial", "removed", "result"] as RepRole[]).find(
@@ -238,22 +301,24 @@ export function GameScreen() {
                 : "thinking"
               : phase === "solved" || phase === "represent"
                 ? "celebrating"
-                : hintVisible || (phase === "question" && attempts > 0)
+                : hintVisible || (phase === "question" && attempts > 0) || countWrong
                   ? "feedback"
-                  : phase === "observe"
+                  : phase === "observe" || phase === "initial-count"
                     ? "pointing"
                     : "observing";
 
-  const challengeNumber = step.kind === "challenge" ? step.challenge.number : null;
+  /** Número do desafio derivado do fluxo ativo (nunca fixo no código). */
+  const challengeNumber =
+    step.kind === "challenge" ? activeChallengeIds.indexOf(step.id) + 1 || null : null;
 
   /**
-   * Composição condensada: telas cuja cena matemática usa cardumes (dezenas).
+   * Composição condensada: telas cuja cena matemática usa grupos de 10 (dezenas).
    * A cena ocupa a faixa protegida Y 135–430 e a mediação vai para a faixa inferior.
    */
   const hasTens =
     (step.kind === "challenge" && step.challenge.tens > 0) ||
-    step.kind === "summary" ||
     (step.kind === "transition" && (step.demo?.tens ?? 0) > 0);
+
 
   /** Composição própria da microetapa de representação simbólica. */
   const isRepresent = step.kind === "challenge" && phase === "represent";
@@ -342,11 +407,13 @@ export function GameScreen() {
               className="font-body text-[30px] font-semibold text-[var(--navy)]"
               style={{ lineHeight: 1.35 }}
             >
-              {phase === "observe"
-                ? step.challenge.tens > 0
-                  ? "Observe os cardumes e os peixes do recife."
-                  : "Observe quantos peixes há no recife."
-                : step.challenge.prompt}
+              {phase === "initial-count" && step.challenge.initialCount
+                ? step.challenge.initialCount.question.text
+                : phase === "observe"
+                  ? step.challenge.tens > 0
+                    ? "Observe os grupos de 10 e os peixes que estão separados."
+                    : "Observe quantos peixes há no recife."
+                  : step.challenge.prompt}
             </h1>
           </div>
 
@@ -359,7 +426,9 @@ export function GameScreen() {
               ones={step.challenge.ones}
               removeTens={step.challenge.removeTens}
               removeOnes={step.challenge.removeOnes}
-              phase={phase === "represent" ? "solved" : phase}
+              phase={
+                phase === "represent" ? "solved" : phase === "initial-count" ? "observe" : phase
+              }
               animationKey={animationKey}
               highlightRemaining={phase === "solved" || phase === "represent"}
               compact={hasTens}
@@ -408,20 +477,20 @@ export function GameScreen() {
             style={{ zIndex: 40 }}
           >
             <p className="font-body text-[24px] font-medium text-[var(--navy)]">
-              35 peixes · 23 saíram · 12 ficaram
+              8 peixes · 3 saíram · 5 ficaram
             </p>
             <p
               className="mt-1 font-display text-[40px] font-bold text-[var(--navy)]"
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              35 − 23 = 12
+              8 − 3 = 5
             </p>
           </div>
           <div className="mt-4 flex w-full justify-center overflow-visible" style={{ zIndex: 10 }}>
             <FishScene
-              tens={3}
-              ones={5}
-              removeTens={2}
+              tens={0}
+              ones={8}
+              removeTens={0}
               removeOnes={3}
               phase="solved"
               animationKey={animationKey}
@@ -548,14 +617,15 @@ export function GameScreen() {
           </button>
         )}
 
-        {step.kind === "challenge" && phase === "observe" && (
-          <AssetButton
-            asset="next"
-            width={190}
-            label="Ver o que aconteceu no recife"
-            onClick={playRemoval}
-          />
-        )}
+        {step.kind === "challenge" &&
+          (phase === "observe" || (phase === "initial-count" && countDone)) && (
+            <AssetButton
+              asset="next"
+              width={190}
+              label="Ver o que acontece no recife"
+              onClick={playRemoval}
+            />
+          )}
 
         {step.kind === "challenge" && (phase === "question" || phase === "removing") && (
           <button
@@ -582,7 +652,7 @@ export function GameScreen() {
         )}
       </div>
 
-      {/* CONTINUAÇÃO APÓS O ACERTO — zona própria nas telas com cardumes */}
+      {/* CONTINUAÇÃO APÓS O ACERTO — zona própria nas telas com grupos de 10 */}
       {step.kind === "challenge" && phase === "solved" && hasTens && (
         <div className="absolute animate-scale-in" style={{ zIndex: 50, right: 24, bottom: 152 }}>
           <button
@@ -616,6 +686,27 @@ export function GameScreen() {
           </div>
         </div>
       )}
+
+      {/* ALTERNATIVAS DA CONTAGEM INICIAL — mesma zona espacial da fase question */}
+      {step.kind === "challenge" &&
+        phase === "initial-count" &&
+        step.challenge.initialCount &&
+        !countDone && (
+          <div
+            className={`absolute inset-x-0 bottom-[36px] flex ${hasTens ? "justify-end pr-8" : "justify-center"}`}
+            style={{ zIndex: 40 }}
+          >
+            <div className={hasTens ? "" : "pr-[240px] pl-[240px]"}>
+              <AnswerOptions
+                options={step.challenge.initialCount.options}
+                selected={countSelected}
+                correctAnswer={step.challenge.initialCount.answer}
+                solved={false}
+                onSelect={answerInitialCount}
+              />
+            </div>
+          </div>
+        )}
 
 
       {/* ZONA C — REPRESENTAÇÃO SIMBÓLICA (composição própria da fase) */}
@@ -654,7 +745,7 @@ export function GameScreen() {
           <div className="flex shrink-0 justify-center pb-4" style={{ width: 470 }}>
             <OperationBuilder
               representation={representation}
-              choices={repChoices}
+              choices={availableRepChoices}
               filled={repFilled}
               activeBlank={activeBlank}
               onChoose={chooseNumber}
@@ -672,7 +763,7 @@ export function GameScreen() {
           <div className="flex w-full justify-center">
             <OperationBuilder
               representation={representation}
-              choices={repChoices}
+              choices={availableRepChoices}
               filled={repFilled}
               activeBlank={activeBlank}
               onChoose={chooseNumber}
