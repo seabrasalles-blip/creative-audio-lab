@@ -33,12 +33,16 @@ export type Representation = {
 
 /** Observação ativa: a criança identifica a quantidade inicial antes da retirada. */
 export type InitialCount = {
+  /** pergunta principal — vai no card superior */
   question: Speech;
+  /** mediação da Mara — vai no balão e no áudio, nunca repete a pergunta */
+  mediation: Speech;
   options: number[];
   answer: number;
   correct: Speech;
   retry: Speech;
 };
+
 
 export type Challenge = {
   id: string;
