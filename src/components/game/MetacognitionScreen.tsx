@@ -91,20 +91,25 @@ export function MetacognitionScreen({
       {/* ZONA ESQUERDA — situação concreta (faixa superior, acima do balão) */}
       {meta.scene && (
         <div
-          className="absolute"
-          style={{ zIndex: 10, left: MARA_LEFT, top: 18, width: LEFT_ZONE_RIGHT - MARA_LEFT }}
+          className="absolute flex justify-center"
+          style={{ zIndex: 10, left: MARA_LEFT, top: 22, width: LEFT_ZONE_RIGHT - MARA_LEFT }}
         >
-          <div style={{ transform: "scale(0.78)", transformOrigin: "left top" }}>
-            <FishScene
-              tens={meta.scene.tens}
-              ones={meta.scene.ones}
-              removeTens={meta.scene.removeTens}
-              removeOnes={meta.scene.removeOnes}
-              phase={scenePhase}
-              animationKey={0}
-              highlightRemaining={scenePhase === "solved"}
-              compact
-            />
+          <div
+            className="rounded-[26px] border-4 border-[var(--navy)] bg-[var(--cream)]/85 px-5 py-3"
+            style={{ maxWidth: LEFT_ZONE_RIGHT - MARA_LEFT }}
+          >
+            <div style={{ transform: "scale(0.7)", transformOrigin: "center top", height: 92 }}>
+              <FishScene
+                tens={meta.scene.tens}
+                ones={meta.scene.ones}
+                removeTens={meta.scene.removeTens}
+                removeOnes={meta.scene.removeOnes}
+                phase={scenePhase}
+                animationKey={0}
+                highlightRemaining={scenePhase === "solved"}
+                compact
+              />
+            </div>
           </div>
         </div>
       )}
